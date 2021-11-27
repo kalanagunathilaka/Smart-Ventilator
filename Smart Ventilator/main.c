@@ -6,7 +6,7 @@
  */ 
 
 #include <avr/io.h>
-#include <vss.h>
+#include <stdbool.h>
 
 
 bool checkStatus();
@@ -32,6 +32,8 @@ void startOxygenAndAirSupply();
 void startAirSupply();
 
 int Average_Blood_Oxygen_level=97;
+int Average_Breath_length=500;
+int Average_Breath_Per_Min=18;
 
 int main(void)
 {
@@ -75,6 +77,7 @@ int main(void)
 
 	bool checkPatientTemp() {
 		//if normal return 1 else notify speaker and gsm
+		return 1;
 	}
 
 	void getParametersFromKnobs() {
@@ -102,8 +105,7 @@ int main(void)
 		}
 
 		int oxygenTankPercentage() {
-			oxygenTankPercentage
+			return 1;
 		}
-
 
 
