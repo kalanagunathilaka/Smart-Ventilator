@@ -3,27 +3,29 @@ Smart Ventilator.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000b8  00000000  00000000  00000054  2**1
+  0 .text         000000c8  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  0000010c  2**0
+  1 .data         00000000  00800060  00800060  0000011c  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  0000010c  2**0
+  2 .comment      00000030  00000000  00000000  0000011c  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000013c  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000014c  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000078  00000000  00000000  00000178  2**0
+  4 .debug_aranges 000000b0  00000000  00000000  00000188  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000006ff  00000000  00000000  000001f0  2**0
+  5 .debug_info   000008c6  00000000  00000000  00000238  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000588  00000000  00000000  000008ef  2**0
+  6 .debug_abbrev 000005cd  00000000  00000000  00000afe  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000251  00000000  00000000  00000e77  2**0
+  7 .debug_line   00000305  00000000  00000000  000010cb  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000000d4  00000000  00000000  000010c8  2**2
+  8 .debug_frame  00000160  00000000  00000000  000013d0  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003f6  00000000  00000000  0000119c  2**0
+  9 .debug_str    000004ee  00000000  00000000  00001530  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000068  00000000  00000000  00001592  2**0
+ 10 .debug_loc    000000b7  00000000  00000000  00001a1e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 000000a0  00000000  00000000  00001ad5  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -63,7 +65,7 @@ Disassembly of section .text:
   60:	10 e0       	ldi	r17, 0x00	; 0
   62:	a0 e6       	ldi	r26, 0x60	; 96
   64:	b0 e0       	ldi	r27, 0x00	; 0
-  66:	e8 eb       	ldi	r30, 0xB8	; 184
+  66:	e8 ec       	ldi	r30, 0xC8	; 200
   68:	f0 e0       	ldi	r31, 0x00	; 0
   6a:	02 c0       	rjmp	.+4      	; 0x70 <__do_copy_data+0x10>
   6c:	05 90       	lpm	r0, Z+
@@ -71,87 +73,92 @@ Disassembly of section .text:
   70:	a0 36       	cpi	r26, 0x60	; 96
   72:	b1 07       	cpc	r27, r17
   74:	d9 f7       	brne	.-10     	; 0x6c <__do_copy_data+0xc>
-  76:	0e 94 4e 00 	call	0x9c	; 0x9c <main>
-  7a:	0c 94 5a 00 	jmp	0xb4	; 0xb4 <_exit>
+  76:	0e 94 56 00 	call	0xac	; 0xac <main>
+  7a:	0c 94 62 00 	jmp	0xc4	; 0xc4 <_exit>
 
 0000007e <__bad_interrupt>:
   7e:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 00000082 <automationOn>:
 
-		void notifySecondaryDisplay() {
+			void notifyDisplay() {
 
-		}
+			}
 
-		void notifyGSM(const char *string, int percentage) {
+			void notifyGSM(const char *string, int percentage) {
   82:	81 e0       	ldi	r24, 0x01	; 1
   84:	08 95       	ret
 
-00000086 <oxygenTankPercentage>:
-
-		}
-
-		int oxygenTankPercentage() {
-			return 1;
-		}
+00000086 <turnOn>:
   86:	81 e0       	ldi	r24, 0x01	; 1
-  88:	90 e0       	ldi	r25, 0x00	; 0
-  8a:	08 95       	ret
+  88:	08 95       	ret
 
-0000008c <checkStatus>:
-	bool automationOn() {
-		return 1;
+0000008a <oxygenTankPercentage>:
+			}
+
+			int oxygenTankPercentage() {
+				//return oxygen tank percentage
+				return 1;
+			}
+  8a:	81 e0       	ldi	r24, 0x01	; 1
+  8c:	90 e0       	ldi	r25, 0x00	; 0
+  8e:	08 95       	ret
+
+00000090 <checkStatus>:
+
+	bool turnOn() {
+		return 1;//return 1 if power on switched pressed else return 0
 	}
 
 	bool checkStatus() {
-		if(oxygenTankPercentage() < 10){
-  8c:	0e 94 43 00 	call	0x86	; 0x86 <oxygenTankPercentage>
-  90:	0a 97       	sbiw	r24, 0x0a	; 10
-  92:	14 f0       	brlt	.+4      	; 0x98 <checkStatus+0xc>
-			notifyGSM("Oxygen Tank Percentage : ",oxygenTankPercentage());
-			notifySecondaryDisplay();
-			return 0;
-			}else{return 1;}
-  94:	81 e0       	ldi	r24, 0x01	; 1
-  96:	08 95       	ret
+  90:	cf 93       	push	r28
+		if (turnOn()) {
+  92:	0e 94 43 00 	call	0x86	; 0x86 <turnOn>
+  96:	c8 2f       	mov	r28, r24
+  98:	88 23       	and	r24, r24
+  9a:	29 f0       	breq	.+10     	; 0xa6 <checkStatus+0x16>
+			if (oxygenTankPercentage() < 10) {
+  9c:	0e 94 45 00 	call	0x8a	; 0x8a <oxygenTankPercentage>
+  a0:	0a 97       	sbiw	r24, 0x0a	; 10
+  a2:	0c f4       	brge	.+2      	; 0xa6 <checkStatus+0x16>
+				notifyGSM("Oxygen Tank Percentage : ", oxygenTankPercentage());
+				notifyDisplay();
+				return 0;
+  a4:	c0 e0       	ldi	r28, 0x00	; 0
+				} else { return 1; }
+				}else{return 0;}
+			}
+  a6:	8c 2f       	mov	r24, r28
+  a8:	cf 91       	pop	r28
+  aa:	08 95       	ret
 
-	bool checkStatus() {
-		if(oxygenTankPercentage() < 10){
-			notifyGSM("Oxygen Tank Percentage : ",oxygenTankPercentage());
-			notifySecondaryDisplay();
-			return 0;
-  98:	80 e0       	ldi	r24, 0x00	; 0
-			}else{return 1;}
-		}
-  9a:	08 95       	ret
-
-0000009c <main>:
+000000ac <main>:
 	/* Replace with your application code */
 
 	while (1)
 	{
 
 		if(checkStatus()){
-  9c:	0e 94 46 00 	call	0x8c	; 0x8c <checkStatus>
-  a0:	88 23       	and	r24, r24
-  a2:	29 f0       	breq	.+10     	; 0xae <main+0x12>
+  ac:	0e 94 48 00 	call	0x90	; 0x90 <checkStatus>
+  b0:	88 23       	and	r24, r24
+  b2:	29 f0       	breq	.+10     	; 0xbe <main+0x12>
 			if(automationOn()){
-  a4:	0e 94 41 00 	call	0x82	; 0x82 <automationOn>
-  a8:	88 23       	and	r24, r24
-  aa:	c1 f3       	breq	.-16     	; 0x9c <main>
-  ac:	f7 cf       	rjmp	.-18     	; 0x9c <main>
-				}else{
+  b4:	0e 94 41 00 	call	0x82	; 0x82 <automationOn>
+  b8:	88 23       	and	r24, r24
+  ba:	c1 f3       	breq	.-16     	; 0xac <main>
+  bc:	f7 cf       	rjmp	.-18     	; 0xac <main>
 				getParametersFromKnobs();
+				startOxygenAndAirSupply(Oxygen_percentage);
 			}
 			}else{return 0;}
 		}
 	}
-  ae:	80 e0       	ldi	r24, 0x00	; 0
-  b0:	90 e0       	ldi	r25, 0x00	; 0
-  b2:	08 95       	ret
+  be:	80 e0       	ldi	r24, 0x00	; 0
+  c0:	90 e0       	ldi	r25, 0x00	; 0
+  c2:	08 95       	ret
 
-000000b4 <_exit>:
-  b4:	f8 94       	cli
+000000c4 <_exit>:
+  c4:	f8 94       	cli
 
-000000b6 <__stop_program>:
-  b6:	ff cf       	rjmp	.-2      	; 0xb6 <__stop_program>
+000000c6 <__stop_program>:
+  c6:	ff cf       	rjmp	.-2      	; 0xc6 <__stop_program>
