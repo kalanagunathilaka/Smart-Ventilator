@@ -7,6 +7,7 @@
 
 #include <avr/io.h>
 #include <stdbool.h>
+#include <math.h>
 
 
 bool checkStatus();
@@ -30,6 +31,7 @@ int checkBloodOxygenLevel();
 
 
 void startAirSupply();
+void controlOxygenPercentage(int bloodOxygenLevel);
 
 void notifySpeaker();
 
@@ -39,13 +41,15 @@ void startStepperMotor(int breathPerMin, int BreathLength);
 
 void startOxygenAndAirSupply(int percentage);
 
-void controlSolenoidValve(int oxygenPercentage, int breathPerMin);
+void controlSolenoidValve(double oxygenPercentage, int breathPerMin);
 
-int calculateConstant(int pressure, int density);
+double calculateConstant(double pressure, double density, double inflationTime, double percentage);
 
-int getOxygenTankPressure();
+double getOxygenTankPressure();
 
-int calculateAnotherTime(int value);
+double calculateAnotherTime(double value, double pressure, double density, double percentage);
+
+void openSolenoidValves(double air, double oxygen);
 
 int Average_Blood_Oxygen_level=97;
 int Average_Breath_length=50;
@@ -79,40 +83,53 @@ int main(void)
 	}
 
 	void startOxygenAndAirSupply(int percentage) {
+		controlOxygenPercentage(checkBloodOxygenLevel());
 		startStepperMotor(Average_Breath_Per_Min, Average_Breath_length);
 		controlSolenoidValve(Oxygen_percentage, Average_Breath_Per_Min);
 	}
+	void controlOxygenPercentage(int bloodOxygenLevel){
+		//update variable Oxygen Percentage According to Blood Oxygen Level
+	}
 
-	void controlSolenoidValve(int oxygenPercentage, int breathPerMin) {
-		int inflationTime=30/breathPerMin;
-		int tAir;//Air Solenoid Valve Time
-		int tOxygen;//Oxygen Solenoid Valve Time
-		int constValue;
-		int Pressure;
-		int airDensity;
-		int OxygenDensity;
+	void controlSolenoidValve(double oxygenPercentage, int breathPerMin) {
+		double inflationTime=30/breathPerMin;
+		double tAir;//Air Solenoid Valve Time
+		double tOxygen;//Oxygen Solenoid Valve Time
+		double constValue;
+		double Pressure=101325;
+		double airDensity=1.225;
+		double OxygenDensity=1.355;
+		tAir=(1-(oxygenPercentage/100))*0.0005*sqrt(OxygenDensity/(2*Pressure));
+		tOxygen=(oxygenPercentage/100)*0.0005*sqrt(airDensity/(2*getOxygenTankPressure()));
 		if(tAir>tOxygen){
 			tAir=inflationTime;
-			constValue=calculateConstant(Pressure, airDensity);
-			tOxygen=calculateAnotherTime(constValue);
+			constValue= calculateConstant(Pressure, airDensity, inflationTime, (1 - (oxygenPercentage / 100)));
+			tOxygen= calculateAnotherTime(constValue, Pressure, airDensity, (1 - (oxygenPercentage / 100)));
+			openSolenoidValves(tAir, tOxygen);
 			} else{
 			tOxygen=inflationTime;
-			
-			constValue=calculateConstant(getOxygenTankPressure(), OxygenDensity);
-			tAir= calculateAnotherTime(constValue);
+
+			constValue= calculateConstant(getOxygenTankPressure(), OxygenDensity, inflationTime,oxygenPercentage/100 );
+			tAir= calculateAnotherTime(constValue, getOxygenTankPressure(), OxygenDensity, oxygenPercentage / 100);
+			openSolenoidValves(tAir, tOxygen);
 		}
 	}
 
-	int calculateAnotherTime(int value) {
-		return 0;
+	void openSolenoidValves(double air, double oxygen) {
+
 	}
 
-	int getOxygenTankPressure() {
-		return 0;//return Oxygen tank pressure
+	double calculateAnotherTime(double value, double pressure, double density, double percentage) {
+		return percentage*value* sqrt(density/(2*pressure));
 	}
 
-	int calculateConstant(int pressure, int density) {
-		return 1;
+	double getOxygenTankPressure() {
+		return 0;//return Oxygen tank pressure in pascal
+	}
+
+	double calculateConstant(double pressure, double density, double inflationTime, double percentage) {
+
+		return (inflationTime/percentage)* sqrt(2*pressure/density);
 	}
 
 	void startAirSupply() {
@@ -145,7 +162,6 @@ int main(void)
 			notifyGSM("Temperature Not Normal",PatientTemp());
 			notifyDisplay();
 			notifySpeaker();
-			return 0;
 			}else{
 			return 1;
 		}
@@ -154,7 +170,7 @@ int main(void)
 
 	void getParametersFromKnobs() {
 
-		//get values Breath per min,Oxygen Percentage,Breath Length
+		//get values and update  Breath per min,Oxygen Percentage,Breath Length
 	}
 
 	bool automationOn() {
@@ -185,7 +201,6 @@ int main(void)
 
 			int oxygenTankPercentage() {
 				//return oxygen tank percentage
-				return 1;
 			}
 
 
