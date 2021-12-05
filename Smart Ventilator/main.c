@@ -4,10 +4,13 @@
  * Created: 11/27/2021 1:26:16 PM
  * Author : Yesitha Sathsara
  */ 
-
+#define F_CPU 8000000UL
 #include <avr/io.h>
 #include <stdbool.h>
 #include <math.h>
+#include <util/delay.h>
+
+
 
 
 bool checkStatus();
@@ -17,6 +20,7 @@ int oxygenTankPercentage();
 void notifyGSM(const char *string, int percentage);
 
 void notifyDisplay();
+void delay_ms(int ms);
 
 bool automationOn();
 
@@ -59,6 +63,8 @@ int Oxygen_percentage=60;
 int main(void)
 {
 	/* Replace with your application code */
+	DDRC = DDRC | (1<<2);
+	DDRC = DDRC | (1<<3);
 
 	while (1)
 	{
@@ -114,13 +120,43 @@ int main(void)
 			openSolenoidValves(tAir, tOxygen);
 		}
 	}
+	void delay_ms(int ms)
+	{
+		while (ms--) {
+			_delay_us(1000);  // one millisecond
+		}
+	}
 
 	void openSolenoidValves(double air, double oxygen) {
+		while (1){
+			if(air>oxygen){
+				while(1){
+					PORTC = PORTC | (1<<2);  //open oxygen(normally closed valve)
+					PORTC = PORTC & (~(1<<3)); //open air (normally open valve)
+					delay_ms(air);
+					PORTC = PORTC & (~(1<<2));//close oxygen
+					delay_ms((air-oxygen));
+					PORTC = PORTC | (1<<3);//close air
+					delay_ms(air);
+				}
+				}else {
+				while (1) {
+					PORTC = PORTC | (1 << 2); //open oxygen(normally closed valve)
+					PORTC = PORTC & (~(1 << 3)); //open air (normally open valve)
+					delay_ms(air);
+					PORTC = PORTC & (~(1 << 2));//close oxygen
+					delay_ms(oxygen-air);
+					PORTC = PORTC | (1 << 3);//close air
+					delay_ms(oxygen);
+				}
+			}
+
+		}
 
 	}
 
 	double calculateAnotherTime(double value, double pressure, double density, double percentage) {
-		return percentage*value* sqrt(density/(2*pressure));
+		return percentage*value*sqrt(density/(2*pressure));
 	}
 
 	double getOxygenTankPressure() {
