@@ -27,7 +27,7 @@ void USART_TxChar(char data)						/* Data transmitting function */
 	while (!(UCSRA & (1<<UDRE)));					/* Wait until data transmit and buffer get empty */
 }
 
-void USART_SendString(char *str)					/* Send string of USART data function */
+void USART_SendString(const char *str)					/* Send string of USART data function */
 {
 	int i=0;
 	while (str[i]!=0)

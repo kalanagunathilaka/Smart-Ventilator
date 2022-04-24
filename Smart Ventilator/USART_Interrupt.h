@@ -18,7 +18,7 @@
 void USART_Init(unsigned long);				/* USART initialize function */
 char USART_RxChar();						/* Data receiving function */
 void USART_TxChar(char);					/* Data transmitting function */
-void USART_SendString(char*);				/* Send string of USART data function */
+void USART_SendString(const char*);				/* Send string of USART data function */
 
 
 

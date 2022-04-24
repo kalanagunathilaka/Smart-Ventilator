@@ -74,6 +74,7 @@ int Oxygen_percentage=60;
 char buff[160];
 char status_flag = 0;	
 char Mobile_no[14];
+volatile int buffer_pointer;   
 
 
 int main(void)
@@ -279,9 +280,10 @@ void notifySpeaker() {
 
 bool checkPatientTemp() {
     if(PatientTemp()>37.2||PatientTemp()<36.1){
-        notifyGSM("Temperature Not Normal",PatientTemp());
+        notifyGSM("Temperature Not Normal-",PatientTemp());
         notifyDisplay();
         notifySpeaker();
+		return 1;
     }else{
         return 1;
     }
@@ -330,10 +332,27 @@ const char *concatS(const char *string, char sPercentage[4]) {
 }
 
 
+
+
 void sendSMS(char no[14], const char *string) {
-    char send_cmd[40];
-    sprintf(send_cmd,"AT+CMGS=\"%s\"%s\r",no,string);
-    USART_SendString(send_cmd);
+	char sms_buffer[35];
+	buffer_pointer=0;
+	sprintf(sms_buffer,"AT+CMGS=\"%s\"\r",no);
+	USART_SendString(sms_buffer); //send command AT+CMGS="Mobile No."\r 
+	_delay_ms(200);
+	while(1)
+	{
+		if(buff[buffer_pointer]==0x3e) // wait for '>' character
+		{
+			buffer_pointer = 0;
+			memset(buff,0,strlen(buff));
+			USART_SendString(string); // send message to given no. 
+			USART_TxChar(0x1a); // send Ctrl+Z 
+			break;
+		}
+		buffer_pointer++;
+	}
+	
 }
 
 int oxygenTankPercentage() {
