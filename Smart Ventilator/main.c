@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define ISP "Dialog"
+#define ISP "mobitel"
 #define APN "dialog"
 #include "USART.h"
 
