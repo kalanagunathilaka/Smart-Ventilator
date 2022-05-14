@@ -52,6 +52,9 @@ void startStepperMotor(int breathPerMin, int BreathLength);
 void startOxygenAndAirSupply(int percentage);
 
 void controlSolenoidValve(double oxygenPercentage, int breathPerMin);
+void rotateFullBackward(int breathPerMin);
+void rotateFullForward(int breathPerMin);
+
 
 
 
@@ -212,10 +215,7 @@ void startAirSupply() {
     controlSolenoidValve(100, Average_Breath_Per_Min);
 }
 
-void startStepperMotor(int breathPerMin, int BreathLength) {
 
-
-}
 
 
 
@@ -305,4 +305,76 @@ void sendSMS(char no[], const char *string) {
 
 int oxygenTankPercentage() {
     return 80;
+}
+void startStepperMotor(int breathPerMin, int BreathLength) {
+	while (1)
+	{
+		rotateFullForward(breathPerMin);
+		openSolenoidValves(60,30);
+		rotateFullBackward(60);
+	}
+}
+
+void rotateFullForward(int breathPerMin){
+	PORTC = PORTC | (1<<4);
+	delay_ms(30/(breathPerMin*10));
+
+	PORTC = PORTC | (1<<7);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<4));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<5);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<7));
+	delay_ms(30/(breathPerMin*10));;
+	
+	PORTC = PORTC | (1<<6);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<5));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<4);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<6));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<4));
+	delay_ms(30/(breathPerMin*10));
+}
+
+void rotateFullBackward(int breathPerMin){
+	PORTC = PORTC | (1<<4);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<6);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<4));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<5);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<6));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<7);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<5));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC | (1<<4);
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<7));
+	delay_ms(30/(breathPerMin*10));
+	
+	PORTC = PORTC & (~(1<<4));
+	delay_ms(30/(breathPerMin*10));
 }
