@@ -92,6 +92,7 @@ unsigned long prev_millis0;
 unsigned long need_millis0;
 int case_num0;
 unsigned long prev_millis1;
+unsigned long need_millis1;
 unsigned long case_num1;
 
 
@@ -115,8 +116,7 @@ int main(void)
     _delay_ms(1000);
     GSMConnect();
 	
-     lcd_cmd(0x80);
-     lcd_msg("Enter Number");
+    
 	 //lcd clear funtion
 	// while(!=press ok)
 	 //	{
@@ -131,7 +131,7 @@ int main(void)
     while (1)
     {   
 		
-     startStepperMotor(12,12);
+     startOxygenAndAirSupply(60);
 
 
 
@@ -166,8 +166,9 @@ void GSMConnect(){
 
 void startOxygenAndAirSupply(int percentage) {
     controlOxygenPercentage(checkBloodOxygenLevel());
+	controlSolenoidValve(Oxygen_percentage, Average_Breath_Per_Min);
     startStepperMotor(Average_Breath_Per_Min, Average_Breath_length);
-    controlSolenoidValve(Oxygen_percentage, Average_Breath_Per_Min);
+    
 }
 void controlOxygenPercentage(int bloodOxygenLevel){
     //update variable Oxygen Percentage According to Blood Oxygen Level
@@ -194,67 +195,66 @@ void controlSolenoidValve(double oxygenPercentage, int breathPerMin) {
        openSolenoidValves(tAir,tOxygen);//values in s
    }
 }
-void delay_ms(double ms)
-{ 
-	int waitTime=ms*1000;
-	
-	for(int i=waitTime;i>0;i--) {
-	_delay_us(1);  // one microsecond
-	}
- //init_millis(8000000UL); //frequency the atmega328p is running at
- //sei();
- //unsigned long prev_millis0; //the last time the led was toggled
-// prev_millis0 = millis();
- 
-// for(;;)
-// {
-//	 if (millis() - prev_millis0 > ms)
-	// {
-		 
-	//	 prev_millis0 = millis();
-	//     return;
-	// }
-//}
 
 
-	
-}
-
-void openSolenoidValves(double air, double oxygen) {
-    air=air*1000;
+void openSolenoidValves(double oxygen, double air) {
+	air=air*1000;
 	oxygen=oxygen*1000;
-		
-        if(air>oxygen){
-            
+	
+	
+	  
+	
+	if(air>oxygen){
+		if(prev_millis1==NULL){
+			
+			prev_millis1=millis();
+			need_millis1=oxygen+prev_millis1;
+			case_num1=1;
+			PORTC = PORTC | (1<<2);  //open oxygen(normally closed valve)
+			PORTC = PORTC & (~(1<<3)); //open air (normally open valve)
+			case_num1++;
+			}else if(need_millis1<millis()){
+			
+			switch(case_num1){
 				
-                PORTC = PORTC | (1<<2);  //open oxygen(normally closed valve)
-                PORTC = PORTC & (~(1<<3)); //open air (normally open valve)
-                delay_ms(oxygen);
-                PORTC = PORTC & (~(1<<2));//close oxygen
-                delay_ms(air-oxygen);
-                PORTC = PORTC | (1<<3);//close air
-                delay_ms(air);
-            
-        }else {
-            
-                PORTC = PORTC | (1 << 2); //open oxygen(normally closed valve)
-                PORTC = PORTC & (~(1 << 3)); //open air (normally open valve)
-                delay_ms(air);
-                PORTC = PORTC & (~(1 << 2));//close oxygen
-                delay_ms(oxygen-air);
-                PORTC = PORTC | (1 << 3);//close air
-                delay_ms(oxygen);
-            
-        }
+				case 2:PORTC = PORTC & (~(1<<2));case_num1++;need_millis1=need_millis1+air-oxygen;break; //close oxygen
+				case 3:PORTC = PORTC | (1<<3);case_num1++;need_millis1=need_millis1+air;break;//close air
+				default:case_num1=NULL;prev_millis1=NULL;
+			}
+			
+			
+			
+			}else {
+			if(prev_millis1==NULL){
+				
+				prev_millis1=millis();
+				need_millis1=air+prev_millis1;
+				case_num1=1;
+				PORTC = PORTC | (1 << 2); //open oxygen(normally closed valve)
+				PORTC = PORTC & (~(1 << 3)); //open air (normally open valve)
+				case_num1++;
+				}else if(need_millis1<millis()){
+				
+				switch(case_num1){
+					
+					case 2:PORTC = PORTC | (1<<3);case_num1++;need_millis1=need_millis1+oxygen-air;break; //close air
+					case 3:PORTC = PORTC & (~(1<<2));case_num1++;need_millis1=need_millis1+oxygen;break;//close oxygen
+					default:case_num1=NULL;prev_millis1=NULL;
+				}
+				
+			  }
 
-    
+			}
 
-}
+		}
+	}
+			
+
 
 
 
 double getOxygenTankPressure() {
-    return 0;//return Oxygen tank pressure in pascal
+    return 12000;//return Oxygen tank pressure in pascal
 }
 
 
@@ -391,94 +391,10 @@ void startStepperMotor(int breathPerMin, int BreathLength) {
 			default:case_num0=NULL;prev_millis0=NULL;
 		}
 	}
-	//rotateFullForward(breathPerMin);
-		
-	//rotateFullBackward(breathPerMin);
 	
-}
 
-void rotateFullForward(int breathPerMin){
-	if(prev_millis1==NULL){
-		
-		prev_millis1=millis();
-		case_num0=30000/(breathPerMin*10)+prev_millis1;
-		case_num0=1;
-		PORTC = PORTC | (1<<4);case_num0++;
-		}else if(case_num0<millis()){
-		
-		switch(case_num0){
-			
-			case 2:PORTC = PORTC | (1<<4);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 3:PORTC = PORTC | (1<<7);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 4:PORTC = PORTC & (~(1<<4));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 5:PORTC = PORTC | (1<<5);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 6:PORTC = PORTC & (~(1<<7));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 7:PORTC = PORTC | (1<<6);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 8:PORTC = PORTC & (~(1<<5));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 9:PORTC = PORTC & (~(1<<6));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			case 10:PORTC = PORTC & (~(1<<4));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
-			default:case_num0=NULL;prev_millis1=NULL;
-		}
-	}
-		
-	
-	
-	
-}
 
-void rotateFullBackward(int breathPerMin){
-	
-	if(prev_millis0==NULL){
-		
-		prev_millis0=millis();
-		need_millis0=30000/(breathPerMin*10)+prev_millis0;
-		case_num0=1;
-		PORTC = PORTC | (1<<4);case_num0++;
-		}else if(need_millis0<millis()){
-		
-		switch(case_num0){
-			
-			case 2:PORTC = PORTC | (1<<6);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 3:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 4:PORTC = PORTC | (1<<5);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 5:PORTC = PORTC & (~(1<<6));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 6:PORTC = PORTC | (1<<7);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 7:PORTC = PORTC & (~(1<<5));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 8:PORTC = PORTC | (1<<4);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 9:PORTC = PORTC & (~(1<<7));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			case 10:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
-			default:case_num0=NULL;prev_millis0=NULL;
-		}
-	}
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
-	
-	
-	//delay_ms(30000/(breathPerMin*10));
+
 	
 }
 
