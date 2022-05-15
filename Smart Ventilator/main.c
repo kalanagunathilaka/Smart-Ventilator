@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <millis.h>
+#include <avr/interrupt.h>
 
 
 
@@ -87,15 +89,16 @@ int main(void)
     /* Replace with your application code */
     DDRC = DDRC | (1<<2);
     DDRC = DDRC | (1<<3);
-    DDRC = DDRC | (1<<4);
-    DDRC = DDRC | (1<<5);
-    DDRC = DDRC | (1<<6);
-    DDRC = DDRC | (1<<7);
+  //  DDRC = DDRC | (1<<4);
+  //  DDRC = DDRC | (1<<5);
+   // DDRC = DDRC | (1<<6);
+  //  DDRC = DDRC | (1<<7);
 	
-
+    
     USART_Init(9600);
     _delay_ms(1000);
     GSMConnect();
+	 
     while (1)
     {   
 		
@@ -169,7 +172,21 @@ void delay_ms(double ms)
 	
 	while (waitTime--) {
 		_delay_us(1);  // one microsecond
-	}
+//	}
+ //init_millis(8000000UL); //frequency the atmega328p is running at
+ //sei();
+ //unsigned long prev_millis; //the last time the led was toggled
+// prev_millis = millis();
+ 
+ //for(;;)
+ //{
+//	 if (millis() - prev_millis > 1000)
+//	 {
+		 
+	//	 prev_millis = millis();
+	// }
+}
+	
 }
 
 void openSolenoidValves(double air, double oxygen) {
@@ -307,12 +324,11 @@ int oxygenTankPercentage() {
     return 80;
 }
 void startStepperMotor(int breathPerMin, int BreathLength) {
-	while (1)
-	{
+	
 		rotateFullForward(breathPerMin);
 		openSolenoidValves(60,30);
 		rotateFullBackward(60);
-	}
+	
 }
 
 void rotateFullForward(int breathPerMin){
@@ -377,4 +393,6 @@ void rotateFullBackward(int breathPerMin){
 	
 	PORTC = PORTC & (~(1<<4));
 	delay_ms(30/(breathPerMin*10));
+	
 }
+

@@ -150,6 +150,18 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="millis.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="millis.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Stepper.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="steppr.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="USART.h">
       <SubType>compile</SubType>
     </Compile>
