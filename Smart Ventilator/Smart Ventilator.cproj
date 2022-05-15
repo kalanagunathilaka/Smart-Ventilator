@@ -150,6 +150,12 @@
     <Compile Include="i2c.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="keypad.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="keypad.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lcd.h">
       <SubType>compile</SubType>
     </Compile>

@@ -16,6 +16,7 @@
 #include <avr/interrupt.h>
 #include "lcd.h"
 #include "i2c.h"
+#include "keypad.h"
 
 
 
@@ -29,7 +30,7 @@ int oxygenTankPercentage();
 
 void notifyGSM(const char *string, int percentage);
 
-void notifyDisplay();
+void notifyDisplay(const char *string);
 void delay_ms(double ms);
 
 bool automationOn();
@@ -82,20 +83,30 @@ int Average_Breath_Per_Min=12;
 int Oxygen_percentage=90;
 char buff[160];
 char status_flag = 0;
-char Mobile_no[] ="94788754809";
+char Mobile_no[12];
 volatile int buffer_pointer;
+unsigned char x;
+bool power;
+bool OxygenAutomation;
+unsigned long prev_millis0;
+unsigned long need_millis0;
+int case_num0;
+unsigned long prev_millis1;
+unsigned long case_num1;
 
 
 int main(void)
 {
     /* Replace with your application code */
-    DDRC = DDRC | (1<<2);
-    DDRC = DDRC | (1<<3);
-    DDRC = DDRC | (1<<4);
-   DDRC = DDRC | (1<<5);
-    DDRC = DDRC | (1<<6);
-   DDRC = DDRC | (1<<7);
-	
+    DDRC = DDRC | (1<<2); // solenoid valve
+    DDRC = DDRC | (1<<3); // solenoid valve
+    DDRC = DDRC | (1<<4); // stepper motor
+    DDRC = DDRC | (1<<5); // stepper motor
+    DDRC = DDRC | (1<<6); // stepper motor
+    DDRC = DDRC | (1<<7); // stepper motor
+	DDRB=0x0F;            //Make PB0 to PB3 = output and PB4 to PB6=input for key pad
+	init_millis(8000000UL);
+	sei();
      i2c_init();
 	 i2c_start();
 	 i2c_write(0x70);
@@ -105,11 +116,22 @@ int main(void)
     GSMConnect();
 	
      lcd_cmd(0x80);
-     lcd_msg("Temp:");
+     lcd_msg("Enter Number");
+	 //lcd clear funtion
+	// while(!=press ok)
+	 //	{
+	 //	PORTB =0xF0;   //Make all columns 1 and all rows 0.
+	 //	if(PINB!=0xF0)
+	 //	{
+	 //		x=Keypad();
+	 //		LCD_Char(x);
+	 //	}
+	 
+	 
     while (1)
     {   
 		
-      startOxygenAndAirSupply(100) ;
+     startStepperMotor(12,12);
 
 
 
@@ -177,22 +199,24 @@ void delay_ms(double ms)
 	int waitTime=ms*1000;
 	
 	for(int i=waitTime;i>0;i--) {
-		_delay_us(1);  // one microsecond
+	_delay_us(1);  // one microsecond
 	}
  //init_millis(8000000UL); //frequency the atmega328p is running at
  //sei();
- //unsigned long prev_millis; //the last time the led was toggled
-// prev_millis = millis();
+ //unsigned long prev_millis0; //the last time the led was toggled
+// prev_millis0 = millis();
  
 // for(;;)
 // {
-//	 if (millis() - prev_millis > ms)
+//	 if (millis() - prev_millis0 > ms)
 	// {
 		 
-	//	 prev_millis = millis();
+	//	 prev_millis0 = millis();
 	//     return;
 	// }
 //}
+
+
 	
 }
 
@@ -260,7 +284,9 @@ void notifySpeaker() {
 bool checkPatientTemp() {
     if(PatientTemp()>37.2||PatientTemp()<36.1){
         notifyGSM("Temperature Not Normal-",PatientTemp());
-        notifyDisplay();
+		char Spercentage[4];
+		itoa(PatientTemp(),Spercentage,10);//convert int to string
+		notifyDisplay(concatS("Temperature Not Normal-", Spercentage)); 
         notifySpeaker();
         return 0;
     }else{
@@ -286,14 +312,16 @@ bool checkStatus() {
     if (turnOn()) {
         if (oxygenTankPercentage() < 10) {
             notifyGSM("Oxygen Tank Percentage : ", oxygenTankPercentage());
-            notifyDisplay();
+			char Spercentage[4];
+			itoa(oxygenTankPercentage(),Spercentage,10);//convert int to string
+            notifyDisplay(concatS("Oxygen Tank Percentage ", Spercentage));
             return 0;
         } else { return 1; }
     }else{return 0;}
 }
 
-void notifyDisplay() {
-
+void notifyDisplay(const char *string) {
+   lcd_msg(string);
 }
 
 void notifyGSM(const char *string, int percentage) {
@@ -332,75 +360,125 @@ int oxygenTankPercentage() {
     return 80;
 }
 void startStepperMotor(int breathPerMin, int BreathLength) {
-	
-		rotateFullForward(breathPerMin);
+	if(prev_millis0==NULL){
 		
-		rotateFullBackward(breathPerMin);
+		prev_millis0=millis();
+		need_millis0=30000/(breathPerMin*10)+prev_millis0;
+		case_num0=1;
+		PORTC = PORTC | (1<<4);case_num0++;
+		}else if(need_millis0<millis()){
+		
+		switch(case_num0){
+			
+			case 2:PORTC = PORTC | (1<<6);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 3:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 4:PORTC = PORTC | (1<<5);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 5:PORTC = PORTC & (~(1<<6));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 6:PORTC = PORTC | (1<<7);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 7:PORTC = PORTC & (~(1<<5));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 8:PORTC = PORTC | (1<<4);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 9:PORTC = PORTC & (~(1<<7));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 10:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 11:PORTC = PORTC | (1<<4);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 12:PORTC = PORTC | (1<<7);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 13:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 14:PORTC = PORTC | (1<<5);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 16:PORTC = PORTC & (~(1<<7));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 17:PORTC = PORTC | (1<<6);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 18:PORTC = PORTC & (~(1<<5));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 19:PORTC = PORTC & (~(1<<6));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 20:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			default:case_num0=NULL;prev_millis0=NULL;
+		}
+	}
+	//rotateFullForward(breathPerMin);
+		
+	//rotateFullBackward(breathPerMin);
 	
 }
 
 void rotateFullForward(int breathPerMin){
-	PORTC = PORTC | (1<<4);
-	delay_ms(30000/(breathPerMin*10));
-
-	PORTC = PORTC | (1<<7);
-	delay_ms(30000/(breathPerMin*10));
+	if(prev_millis1==NULL){
+		
+		prev_millis1=millis();
+		case_num0=30000/(breathPerMin*10)+prev_millis1;
+		case_num0=1;
+		PORTC = PORTC | (1<<4);case_num0++;
+		}else if(case_num0<millis()){
+		
+		switch(case_num0){
+			
+			case 2:PORTC = PORTC | (1<<4);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 3:PORTC = PORTC | (1<<7);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 4:PORTC = PORTC & (~(1<<4));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 5:PORTC = PORTC | (1<<5);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 6:PORTC = PORTC & (~(1<<7));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 7:PORTC = PORTC | (1<<6);case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 8:PORTC = PORTC & (~(1<<5));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 9:PORTC = PORTC & (~(1<<6));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			case 10:PORTC = PORTC & (~(1<<4));case_num0++;case_num0=case_num0+30000/(breathPerMin*10);break;
+			default:case_num0=NULL;prev_millis1=NULL;
+		}
+	}
+		
 	
-	PORTC = PORTC & (~(1<<4));
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC | (1<<5);
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC & (~(1<<7));
-	delay_ms(30000/(breathPerMin*10));;
-	
-	PORTC = PORTC | (1<<6);
-	delay_ms(30000/(breathPerMin*10));
-	
-	PORTC = PORTC & (~(1<<5));
-	delay_ms(30000/(breathPerMin*10));
-	
-	PORTC = PORTC | (1<<4);
-	delay_ms(30000/(breathPerMin*10));
-	
-	PORTC = PORTC & (~(1<<6));
-	delay_ms(30000/(breathPerMin*10));
-	
-	PORTC = PORTC & (~(1<<4));
-	delay_ms(30000/(breathPerMin*10));
 }
 
 void rotateFullBackward(int breathPerMin){
-	PORTC = PORTC | (1<<4);
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC | (1<<6);
-	delay_ms(30000/(breathPerMin*10));
+	if(prev_millis0==NULL){
+		
+		prev_millis0=millis();
+		need_millis0=30000/(breathPerMin*10)+prev_millis0;
+		case_num0=1;
+		PORTC = PORTC | (1<<4);case_num0++;
+		}else if(need_millis0<millis()){
+		
+		switch(case_num0){
+			
+			case 2:PORTC = PORTC | (1<<6);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 3:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 4:PORTC = PORTC | (1<<5);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 5:PORTC = PORTC & (~(1<<6));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 6:PORTC = PORTC | (1<<7);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 7:PORTC = PORTC & (~(1<<5));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 8:PORTC = PORTC | (1<<4);case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 9:PORTC = PORTC & (~(1<<7));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			case 10:PORTC = PORTC & (~(1<<4));case_num0++;need_millis0=need_millis0+30000/(breathPerMin*10);break;
+			default:case_num0=NULL;prev_millis0=NULL;
+		}
+	}
 	
-	PORTC = PORTC & (~(1<<4));
-	delay_ms(30000/(breathPerMin*10));
+	//delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC | (1<<5);
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC & (~(1<<6));
-	delay_ms(30000/(breathPerMin*10));
+	//delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC | (1<<7);
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC & (~(1<<5));
-	delay_ms(30000/(breathPerMin*10));
+	//delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC | (1<<4);
-	delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC & (~(1<<7));
-	delay_ms(30000/(breathPerMin*10));
+	//delay_ms(30000/(breathPerMin*10));
 	
-	PORTC = PORTC & (~(1<<4));
-	delay_ms(30000/(breathPerMin*10));
+	
+	//delay_ms(30000/(breathPerMin*10));
+	
+	
+	//delay_ms(30000/(breathPerMin*10));
+	
+	
+	//delay_ms(30000/(breathPerMin*10));
+	
+	
+	//delay_ms(30000/(breathPerMin*10));
+	
+	
+	//delay_ms(30000/(breathPerMin*10));
+	
+	
+	//delay_ms(30000/(breathPerMin*10));
 	
 }
 
