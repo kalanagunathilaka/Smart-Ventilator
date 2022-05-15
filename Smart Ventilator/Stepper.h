@@ -1,43 +1,4 @@
-/*
- * Stepper.h - Stepper library for Wiring/Arduino - Version 1.1.0
- *
- * Original library        (0.1)   by Tom Igoe.
- * Two-wire modifications  (0.2)   by Sebastian Gassner
- * Combination version     (0.3)   by Tom Igoe and David Mellis
- * Bug fix for four-wire   (0.4)   by Tom Igoe, bug fix from Noah Shibley
- * High-speed stepping mod         by Eugene Kozlenko
- * Timer rollover fix              by Eugene Kozlenko
- * Five phase five wire    (1.1.0) by Ryan Orendorff
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- *
- * Drives a unipolar, bipolar, or five phase stepper motor.
- *
- * When wiring multiple stepper motors to a microcontroller, you quickly run
- * out of output pins, with each motor requiring 4 connections.
- *
- * By making use of the fact that at any time two of the four motor coils are
- * the inverse of the other two, the number of control connections can be
- * reduced from 4 to 2 for the unipolar and bipolar motors.
- *
- * A slightly modified circuit around a Darlington transistor array or an
- * L293 H-bridge connects to only 2 microcontroler pins, inverts the signals
- * received, and delivers the 4 (2 plus 2 inverted ones) output signals
- * required for driving a stepper motor. Similarly the Arduino motor shields
- * 2 direction pins may be used.
+
  *
  * The sequence of control signals for 5 phase, 5 control wires is as follows:
  *
@@ -96,16 +57,17 @@
 
     int version(void);
 
-  
     void stepMotor(int this_step);
+	
 struct  Stepper {
-               // Direction of rotation
+    int direction;            // Direction of rotation
     unsigned long step_delay; // delay between steps, in ms, based on speed
     int number_of_steps;      // total number of steps this motor can take
     int pin_count;            // how many pins are in use.
-            // which step the motor is on
+    int step_number;          // which step the motor is on
 
     // motor pin numbers:
+	
     int motor_pin_1;
     int motor_pin_2;
     int motor_pin_3;
@@ -113,13 +75,14 @@ struct  Stepper {
     
 
     unsigned long last_step_time; // time stamp in us of when the last step was taken
+	
 };
 
-Stepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
+void Stepper(int number_of_steps, int motor_pin_1, int motor_pin_2,
 int motor_pin_3, int motor_pin_4)
 {
-	int step_number = 0;    // which step the motor is on
-	int direction = 0;      // motor direction
+	step_number = 0;    // which step the motor is on
+	direction = 0;      // motor direction
 	last_step_time = 0; // timestamp in us of the last step taken
 	number_of_steps = number_of_steps; // total number of steps for this motor
 	init_millis(8000000UL); //frequency the atmega328p is running at

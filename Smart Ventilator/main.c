@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <millis.h>
 #include <avr/interrupt.h>
+#include "lcd.h"
+#include "i2c.h"
 
 
 
@@ -89,21 +91,25 @@ int main(void)
     /* Replace with your application code */
     DDRC = DDRC | (1<<2);
     DDRC = DDRC | (1<<3);
-  //  DDRC = DDRC | (1<<4);
-  //  DDRC = DDRC | (1<<5);
-   // DDRC = DDRC | (1<<6);
-  //  DDRC = DDRC | (1<<7);
+    DDRC = DDRC | (1<<4);
+   DDRC = DDRC | (1<<5);
+    DDRC = DDRC | (1<<6);
+   DDRC = DDRC | (1<<7);
 	
-    
+     i2c_init();
+	 i2c_start();
+	 i2c_write(0x70);
+	 lcd_init();
     USART_Init(9600);
     _delay_ms(1000);
     GSMConnect();
-	 
+	
+     lcd_cmd(0x80);
+     lcd_msg("Temp:");
     while (1)
     {   
 		
-		
-        
+      startOxygenAndAirSupply(100) ;
 
 
 
@@ -159,38 +165,40 @@ void controlSolenoidValve(double oxygenPercentage, int breathPerMin) {
    if(constValue>1){
        tOxygen=inflationTime;
        tAir=tOxygen/constValue;
-       openSolenoidValves(tAir*1000,tOxygen*1000);// values in ms
+       openSolenoidValves(tAir,tOxygen);// values in s
    } else{
        tAir=inflationTime;
        tOxygen=tAir*constValue;
-       openSolenoidValves(tAir*1000,tOxygen*1000);//values in ms
+       openSolenoidValves(tAir,tOxygen);//values in s
    }
 }
 void delay_ms(double ms)
 { 
 	int waitTime=ms*1000;
 	
-	while (waitTime--) {
+	for(int i=waitTime;i>0;i--) {
 		_delay_us(1);  // one microsecond
-//	}
+	}
  //init_millis(8000000UL); //frequency the atmega328p is running at
  //sei();
  //unsigned long prev_millis; //the last time the led was toggled
 // prev_millis = millis();
  
- //for(;;)
- //{
-//	 if (millis() - prev_millis > 1000)
-//	 {
+// for(;;)
+// {
+//	 if (millis() - prev_millis > ms)
+	// {
 		 
 	//	 prev_millis = millis();
+	//     return;
 	// }
-}
+//}
 	
 }
 
 void openSolenoidValves(double air, double oxygen) {
-    
+    air=air*1000;
+	oxygen=oxygen*1000;
 		
         if(air>oxygen){
             
@@ -326,73 +334,73 @@ int oxygenTankPercentage() {
 void startStepperMotor(int breathPerMin, int BreathLength) {
 	
 		rotateFullForward(breathPerMin);
-		openSolenoidValves(60,30);
-		rotateFullBackward(60);
+		
+		rotateFullBackward(breathPerMin);
 	
 }
 
 void rotateFullForward(int breathPerMin){
 	PORTC = PORTC | (1<<4);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 
 	PORTC = PORTC | (1<<7);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<4));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<5);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<7));
-	delay_ms(30/(breathPerMin*10));;
+	delay_ms(30000/(breathPerMin*10));;
 	
 	PORTC = PORTC | (1<<6);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<5));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<4);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<6));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<4));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 }
 
 void rotateFullBackward(int breathPerMin){
 	PORTC = PORTC | (1<<4);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<6);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<4));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<5);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<6));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<7);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<5));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC | (1<<4);
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<7));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 	PORTC = PORTC & (~(1<<4));
-	delay_ms(30/(breathPerMin*10));
+	delay_ms(30000/(breathPerMin*10));
 	
 }
 

@@ -147,6 +147,12 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="i2c.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="lcd.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -154,12 +160,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="millis.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Stepper.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="steppr.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="USART.h">
