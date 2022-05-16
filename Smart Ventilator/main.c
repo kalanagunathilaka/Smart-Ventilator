@@ -75,6 +75,17 @@ void GSMConnect();
 
 
 void sendSMS(char no[], const char *string);
+ISR (INT0_vect) {         //External interrupt
+
+	
+}
+ISR (INT1_vect) {         //External interrupt
+
+
+}
+ISR (INT2_vect) {         //External interrupt
+
+}
 
 const char *concatS(const char *string, char sPercentage[4]);
 char *boolstring( _Bool b );
@@ -87,7 +98,7 @@ char status_flag = 0;
 char Mobile_no[12];
 volatile int buffer_pointer;
 unsigned char x;
-bool power;
+bool powerOff;
 bool OxygenAutomation;
 unsigned long prev_millis0;
 unsigned long need_millis0;
@@ -106,8 +117,15 @@ int main(void)
     DDRC = DDRC | (1<<5); // stepper motor
     DDRC = DDRC | (1<<6); // stepper motor
     DDRC = DDRC | (1<<7); // stepper motor
-	//DDRB=0x0F;            //Make PB0 to PB3 = output and PB4 to PB6=input for key pad
-	 DDRB=0x8B; // 0,1,3,7--->1 2,4,5,6-->0
+	
+	 DDRB=0x8B; // 0,1,3,7--->1 2,4,5,6-->0 for keypad and switch
+	 DDRD=DDRD | (0<<2);
+	 DDRD=DDRD | (0<<3);
+	 DDRD=DDRD | (0<<6);//PD6 as input for power on
+	 DDRD=DDRD | (0<<5);//PD5 as Oxygen Automation
+	 GICR=0xe0;// Enable INT 0,1,2
+	 MCUCR=0x05;
+	 MCUCSR=0x40;
 	init_millis(8000000UL);
 	sei();
      i2c_init();
@@ -135,25 +153,22 @@ int main(void)
 	 PORTB = PORTB & (~(1<<1));
 	 PORTB = PORTB & (~(1<<3));
 	 PORTB = PORTB & (~(1<<7));
-	 while(1)
-		{
+	 
 			
 			//keypad
 		
-		   //(PINB&(1<<PINB5))
-		
-		//	
-			if((PINB&(1<<PINB4))==0|(PINB&(1<<PINB5))==0|(PINB&(1<<PINB6))==0){
-			x=Keypad();
-				
-				
-		
-		lcd_msg(x);
+		   
+	 lcd_cmd(0x28);
+	 lcd_msg(" Add Phone Num ");
+	 _delay_ms(3000);
+	if((PINB&(1<<PINB4))==0|(PINB&(1<<PINB5))==0|(PINB&(1<<PINB6))==0){//this will check if keypad is pressed.
+	 x=Keypad();
+	 lcd_msg(x);
 			}
 	 	
-		}
+		
 	 
-    while (0)
+    while (1)
     {   
 		
      startOxygenAndAirSupply(60);

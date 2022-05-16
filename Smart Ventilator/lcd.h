@@ -28,7 +28,7 @@ void lcd_msg(char *c);		//----Function to Send String to LCD
 void delay(int ms);			//----Delay function
 void lcd_lef_sh();			//----Left Shifting Function
 void lcd_rig_sh();			//----Right Shifting Function
-//----------------------//
+
 
 void toggle()
 {
