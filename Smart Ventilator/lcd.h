@@ -17,7 +17,7 @@
 //#endif /* LCD_H_ */
 
 #include <avr/io.h>
-
+//------------------------//
 
 void lcd_init();			//----LCD Initializing Function
 void toggle();				//----Latching function of LCD

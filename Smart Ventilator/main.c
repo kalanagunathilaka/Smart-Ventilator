@@ -17,6 +17,7 @@
 #include "lcd.h"
 #include "i2c.h"
 #include "keypad.h"
+#include "string.h"
 
 
 
@@ -76,7 +77,7 @@ void GSMConnect();
 void sendSMS(char no[], const char *string);
 
 const char *concatS(const char *string, char sPercentage[4]);
-
+char *boolstring( _Bool b );
 int Average_Blood_Oxygen_level=97;
 int Average_Breath_length=50;
 int Average_Breath_Per_Min=12;
@@ -105,7 +106,8 @@ int main(void)
     DDRC = DDRC | (1<<5); // stepper motor
     DDRC = DDRC | (1<<6); // stepper motor
     DDRC = DDRC | (1<<7); // stepper motor
-	DDRB=0x0F;            //Make PB0 to PB3 = output and PB4 to PB6=input for key pad
+	//DDRB=0x0F;            //Make PB0 to PB3 = output and PB4 to PB6=input for key pad
+	 DDRB=0x8B; // 0,1,3,7--->1 2,4,5,6-->0
 	init_millis(8000000UL);
 	sei();
      i2c_init();
@@ -126,9 +128,32 @@ int main(void)
 	 //		x=Keypad();
 	 //		LCD_Char(x);
 	 //	}
+	 PORTB = PORTB | (1<<4);
+	 PORTB = PORTB | (1<<5);
+	 PORTB = PORTB | (1<<6);
+	 PORTB = PORTB & (~(1<<0));
+	 PORTB = PORTB & (~(1<<1));
+	 PORTB = PORTB & (~(1<<3));
+	 PORTB = PORTB & (~(1<<7));
+	 while(1)
+		{
+			
+			//keypad
+		
+		   //(PINB&(1<<PINB5))
+		
+		//	
+			if((PINB&(1<<PINB4))==0|(PINB&(1<<PINB5))==0|(PINB&(1<<PINB6))==0){
+			x=Keypad();
+				
+				
+		
+		lcd_msg(x);
+			}
+	 	
+		}
 	 
-	 
-    while (1)
+    while (0)
     {   
 		
      startOxygenAndAirSupply(60);
@@ -163,7 +188,7 @@ void GSMConnect(){
     _delay_ms(10);
     USART_SendString("AT+SAPBR=1,1\r");
 }
-
+char *boolstring( _Bool b ) { return b ? "true" : "false"; }
 void startOxygenAndAirSupply(int percentage) {
     controlOxygenPercentage(checkBloodOxygenLevel());
 	controlSolenoidValve(Oxygen_percentage, Average_Breath_Per_Min);
