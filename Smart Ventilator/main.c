@@ -75,23 +75,14 @@ void GSMConnect();
 
 
 void sendSMS(char no[], const char *string);
-ISR (INT0_vect) {         //External interrupt
-
-	
-}
-ISR (INT1_vect) {         //External interrupt
 
 
-}
-ISR (INT2_vect) {         //External interrupt
-
-}
 void ADC_Init(int i)
 {
     switch(i){
         case 1:{DDRA=0x0;			/* Make ADC port as input */
             ADCSRA = 0x87;			/* Enable ADC, fr/128  */
-            ADMUX = 0x01;
+            ADMUX = 0x00;
             break;	}		/* Vref: Aref, ADC channel: 1 */
         case 2:{DDRA=0x0;			/* Make ADC port as input */
             ADCSRA = 0x87;			/* Enable ADC, fr/128  */
@@ -134,13 +125,14 @@ char status_flag = 0;
 char Mobile_no[12];
 volatile int buffer_pointer;
 unsigned char x;
-bool powerOff;
-bool OxygenAutomation;
+bool power=true;
+bool OxygenAutomation=true;
 unsigned long prev_millis0;
 unsigned long need_millis0;
 int case_num0;
 unsigned long prev_millis1;
 unsigned long need_millis1;
+
 unsigned long case_num1;
 int rBPM;
 int rBL;
@@ -163,9 +155,10 @@ int main(void)
 	 DDRD=DDRD | (0<<3);
 	 DDRD=DDRD | (0<<6);//PD6 as input for power on
 	 DDRD=DDRD | (0<<5);//PD5 as Oxygen Automation
-	 GICR=0xe0;// Enable INT 0,1,2
+	 DDRD=DDRD | (1<<4);//Speaker
+	 GICR=1<<INT0 | 1<<INT1 ;
 	 MCUCR=0x05;
-	 MCUCSR=0x40;
+	
 	init_millis(8000000UL);
 	sei();
      i2c_init();
@@ -210,19 +203,19 @@ int main(void)
 	 
     while (1)
     {   
-		for ( i=1;i<4;i++)
-		{
-			ADC_Init(i);
-
-			if(i==3){
-				rOP=ADC_Read(4);
-				
-				}else if(i==1){
-				rBPM=ADC_Read(1);
-				}else if(i==2){
-				rBL=ADC_Read(3);
-			}
-		}
+		//for ( i=1;i<4;i++)
+		//{
+			//adc_init(i);
+//
+			//if(i==3){
+				//rop=adc_read(4);
+				//
+				//}else if(i==1){
+				//rbpm=adc_read(0);
+				//}else if(i==2){
+				//rbl=adc_read(3);
+			//}
+		//}
 		i=1;
 
 		lcd_cmd(0x28);
@@ -230,9 +223,9 @@ int main(void)
 		itoa(rOP,rSOP,10);
 		itoa(rOP,rSBPM,10);
 		itoa(rOP,rSBL,10);
-		lcd_msg(rSOP);
-		lcd_msg(rSBPM);
-		lcd_msg(rSBL);
+		///lcd_msg(rSOP);
+		//lcd_msg(rSBPM);
+		//lcd_msg(rSBL);
 
      startOxygenAndAirSupply(60);
 
@@ -255,6 +248,26 @@ int main(void)
             }
         }else{return 0;}
     }
+}
+ISR (INT0_vect) {         //External interrupt
+	if((PIND&(0<<PIND2))){
+		OxygenAutomation=false;
+	}else{
+		OxygenAutomation=true;
+	}
+	
+	_delay_ms(50);
+	
+}
+ISR (INT1_vect) {         //External interrupt
+	if((PIND&(0<<PIND3))){
+		power=false;
+		}else{
+		power=true;
+	}
+	
+	_delay_ms(50);
+
 }
 void GSMConnect(){
     USART_SendString("ATE0\r");
@@ -381,7 +394,8 @@ int PatientTemp() {
 }
 
 void notifySpeaker() {
-
+   DDRD=DDRD | (1<<4);
+   
 }
 
 bool checkPatientTemp() {
