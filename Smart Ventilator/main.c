@@ -86,7 +86,43 @@ ISR (INT1_vect) {         //External interrupt
 ISR (INT2_vect) {         //External interrupt
 
 }
+void ADC_Init(int i)
+{
+    switch(i){
+        case 1:{DDRA=0x0;			/* Make ADC port as input */
+            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
+            ADMUX = 0x01;
+            break;	}		/* Vref: Aref, ADC channel: 1 */
+        case 2:{DDRA=0x0;			/* Make ADC port as input */
+            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
+            ADMUX = 0x03;
+            break;	}		/* Vref: Aref, ADC channel: 3 */
+        case 3:{DDRA=0x0;			/* Make ADC port as input */
+            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
+            ADMUX = 0x04;
+            break;	}		/* Vref: Aref, ADC channel: 4 */
 
+    }
+
+
+}
+int ADC_Read(int channel)
+{
+
+    int Ain,AinLow;
+
+    ADMUX=ADMUX|(channel & 0x0f);	/* Set input channel to read */
+
+    ADCSRA |= (1<<ADSC);		/* Start conversion */
+    while((ADCSRA&(1<<ADIF))==0);	/* Monitor end of conversion interrupt */
+
+    _delay_us(10);
+    AinLow = (int)ADCL;		/* Read lower byte*/
+    Ain = (int)ADCH*256;		/* Read higher 2 bits and
+					Multiply with weight */
+    Ain = Ain + AinLow;
+    return(Ain);			/* Return digital value*/
+}
 const char *concatS(const char *string, char sPercentage[4]);
 char *boolstring( _Bool b );
 int Average_Blood_Oxygen_level=97;
@@ -106,6 +142,10 @@ int case_num0;
 unsigned long prev_millis1;
 unsigned long need_millis1;
 unsigned long case_num1;
+int rBPM;
+int rBL;
+int rOP;
+int i;
 
 
 int main(void)
@@ -158,19 +198,42 @@ int main(void)
 			//keypad
 		
 		   
-	 lcd_cmd(0x28);
-	 lcd_msg(" Add Phone Num ");
-	 _delay_ms(3000);
-	if((PINB&(1<<PINB4))==0|(PINB&(1<<PINB5))==0|(PINB&(1<<PINB6))==0){//this will check if keypad is pressed.
-	 x=Keypad();
-	 lcd_msg(x);
-			}
+//	 lcd_cmd(0x28);
+	// lcd_msg(" Add Phone Num ");
+	// _delay_ms(3000);
+//	if((PINB&(1<<PINB4))==0|(PINB&(1<<PINB5))==0|(PINB&(1<<PINB6))==0){//this will check if keypad is pressed.
+//	 x=Keypad();
+//	 lcd_msg(x);
+	//		}
 	 	
 		
 	 
     while (1)
     {   
-		
+		for ( i=1;i<4;i++)
+		{
+			ADC_Init(i);
+
+			if(i==3){
+				rOP=ADC_Read(4);
+				
+				}else if(i==1){
+				rBPM=ADC_Read(1);
+				}else if(i==2){
+				rBL=ADC_Read(3);
+			}
+		}
+		i=1;
+
+		lcd_cmd(0x28);
+		char* rSOP,rSBPM,rSBL;
+		itoa(rOP,rSOP,10);
+		itoa(rOP,rSBPM,10);
+		itoa(rOP,rSBL,10);
+		lcd_msg(rSOP);
+		lcd_msg(rSBPM);
+		lcd_msg(rSBL);
+
      startOxygenAndAirSupply(60);
 
 
