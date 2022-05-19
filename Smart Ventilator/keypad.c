@@ -9,18 +9,10 @@
 #include<util/delay.h>
 
 
-
 char Keypad()
 {
 	
-//	PORTB=0b1111110;         // make first row 0
-	PORTB = PORTB | (1<<4);
-	PORTB = PORTB | (1<<5);
-	PORTB = PORTB | (1<<6);
-	PORTB = PORTB & (~(1<<0));
-	PORTB = PORTB | (1<<1);
-	PORTB = PORTB | (1<<3);
-	PORTB = PORTB | (1<<7); //<--2
+	PORTB=0b1111110;         // make first row 0
 	if((PINB &(1<<PINB4))==0)
 	{
 		_delay_ms(3);
@@ -39,14 +31,7 @@ char Keypad()
 	}
 	
 
-//	PORTB=0b1111101;   // make second row 0
-		PORTB = PORTB | (1<<4);
-		PORTB = PORTB | (1<<5);
-		PORTB = PORTB | (1<<6);
-		PORTB = PORTB & (~(1<<1));
-		PORTB = PORTB | (1<<0);
-		PORTB = PORTB | (1<<3);
-		PORTB = PORTB | (1<<7);// <--2
+	PORTB=0b1111101;   // make second row 0
 	if((PINB &(1<<PINB4))==0)
 	{
 		_delay_ms(3);
@@ -64,14 +49,7 @@ char Keypad()
 	}
 	
 
-//	PORTB=0b1111011;   // make third row 0
-	PORTB = PORTB | (1<<4);
-	PORTB = PORTB | (1<<5);
-	PORTB = PORTB | (1<<6);
-	PORTB = PORTB & (~(1<<7));
-	PORTB = PORTB | (1<<1);
-	PORTB = PORTB | (1<<3);
-	PORTB = PORTB | (1<<0); //<--2
+	PORTB=0b1111011;   // make third row 0
 	if((PINB &(1<<PINB4))==0)
 	{
 		_delay_ms(3);
@@ -89,19 +67,12 @@ char Keypad()
 	}
 	
 
-	//PORTB=0b1110111;   // make fourth row 0
-		PORTB = PORTB | (1<<4);
-		PORTB = PORTB | (1<<5);
-		PORTB = PORTB | (1<<6);
-		PORTB = PORTB & (~(1<<3));
-		PORTB = PORTB | (1<<0);
-		PORTB = PORTB | (1<<1);
-		PORTB = PORTB | (1<<7);// <--2
+	PORTB=0b1110111;   // make fourth row 0
 	if((PINB &(1<<PINB4))==0)
 	{
 		_delay_ms(3);
+		return"del";
 		
-		return"CLR";
 	}
 	else if((PINB&(1<<PINB5))==0)
 	{
@@ -111,23 +82,14 @@ char Keypad()
 	else if((PINB&(1<<PINB6))==0)
 	{
 		_delay_ms(3);
-		return"OK";
+		return"ok";
 	}
 	
 
 }
 
+
 	
-	
-	//while(1)
-	//	{
-	//		PORTB =0xF0;   //Make all columns 1 and all rows 0.
-	//		if(PINB!=0xF0)
-	//		{
-	//			x=Keypad();
-	//			lcd_msg(x);
-	//		}
-	
-	//	}
-	//	return 0;
+
+
 

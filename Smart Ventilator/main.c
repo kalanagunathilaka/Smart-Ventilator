@@ -161,6 +161,7 @@ int main(void)
 	
 	init_millis(8000000UL);
 	sei();
+	DDRB=0x0F; 
      i2c_init();
 	 i2c_start();
 	 i2c_write(0x70);
@@ -179,13 +180,14 @@ int main(void)
 	 //		x=Keypad();
 	 //		LCD_Char(x);
 	 //	}
-	 PORTB = PORTB | (1<<4);
+	 /*PORTB = PORTB | (1<<4);
 	 PORTB = PORTB | (1<<5);
 	 PORTB = PORTB | (1<<6);
 	 PORTB = PORTB & (~(1<<0));
 	 PORTB = PORTB & (~(1<<1));
 	 PORTB = PORTB & (~(1<<3));
-	 PORTB = PORTB & (~(1<<7));
+	 PORTB = PORTB & (~(1<<7));*/
+	 
 	 
 			
 			//keypad
