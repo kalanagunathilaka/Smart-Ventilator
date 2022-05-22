@@ -2,7 +2,7 @@
  * lcd.h
  *
  * Created: 7/5/2022 4:31:08 pm
- *  Author: Shakila
+ *  Author: Shakila Kularathna
  */ 
 
 

@@ -21,7 +21,8 @@ main.d main.o: .././main.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
  ../millis.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
- .././lcd.h .././i2c.h .././keypad.h .././USART.h
+ .././lcd.h .././i2c.h .././keypad.h .././GSM.h .././USART.h \
+ .././solenoidValves.h .././stepper\ motor.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -73,4 +74,10 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 .././keypad.h:
 
+.././GSM.h:
+
 .././USART.h:
+
+.././solenoidValves.h:
+
+.././stepper\ motor.h:
