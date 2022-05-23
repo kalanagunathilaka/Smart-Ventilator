@@ -48,46 +48,34 @@ void GSMConnect();
 void sendSMS(char no[], const char *string);
 
 
-void ADC_Init(int i)
+void ADC_Init()
 {
-    switch(i){
-        case 1:{DDRA=0x0;			/* Make ADC port as input */
-            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
-            ADMUX = 0x00;
-            break;	}		/* Vref: Aref, ADC channel: 1 */
-        case 2:{DDRA=0x0;			/* Make ADC port as input */
-            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
-            ADMUX = 0x03;
-            break;	}		/* Vref: Aref, ADC channel: 3 */
-        case 3:{DDRA=0x0;			/* Make ADC port as input */
-            ADCSRA = 0x87;			/* Enable ADC, fr/128  */
-            ADMUX = 0x04;
-            break;	}		/* Vref: Aref, ADC channel: 4 */
-
-    }
-
-
+	DDRA=0x0;			/* Make ADC port as input */
+	ADCSRA = 0x87;			/* Enable ADC, fr/128  */
+	ADMUX = 0x40;			/* Vref: Avcc, ADC channel: 0 */
+	
 }
-int ADC_Read(int channel)
+
+int ADC_Read(char channel)
 {
+	int Ain,AinLow;
+	
+	ADMUX=ADMUX|(channel & 0x0f);	/* Set input channel to read */
 
-    int Ain,AinLow;
-
-    ADMUX=ADMUX|(channel & 0x0f);	/* Set input channel to read */
-
-    ADCSRA |= (1<<ADSC);		/* Start conversion */
-    while((ADCSRA&(1<<ADIF))==0);	/* Monitor end of conversion interrupt */
-
-    _delay_us(10);
-    AinLow = (int)ADCL;		/* Read lower byte*/
-    Ain = (int)ADCH*256;		/* Read higher 2 bits and
+	ADCSRA |= (1<<ADSC);		/* Start conversion */
+	while((ADCSRA&(1<<ADIF))==0);	/* Monitor end of conversion interrupt */
+	
+	_delay_us(10);
+	AinLow = (int)ADCL;		/* Read lower byte*/
+	Ain = (int)ADCH*256;		/* Read higher 2 bits and 
 					Multiply with weight */
-    Ain = Ain + AinLow;
-    return(Ain);			/* Return digital value*/
+	Ain = Ain + AinLow;				
+	return(Ain);			/* Return digital value*/
 }
+
 const char *concatS(const char *string, char sPercentage[4]);
 char *boolstring( _Bool b );
-int Average_Blood_Oxygen_level=97;
+int Average_Blood_Oxygen_level=94;
 int Average_Breath_length=50;
 int Average_Breath_Per_Min=12;
 int Oxygen_percentage=90;
@@ -103,6 +91,9 @@ int rBPM;
 int rBL;
 int rOP;
 int i;
+int caseADC=1;
+char String[5];
+int value;
 
 
 int main(void)
@@ -129,7 +120,7 @@ int main(void)
 	
 	init_millis(8000000UL);
 	sei();
-	 
+	 ADC_Init();
      i2c_init();
 	 i2c_start();
 	 i2c_write(0x70);
@@ -200,31 +191,37 @@ int main(void)
 	 
     while (1)
     {   
-		//for ( i=1;i<4;i++)
-		//{
-			//adc_init(i);
-//
-			//if(i==3){
-				//rop=adc_read(4);
-				//
-				//}else if(i==1){
-				//rbpm=adc_read(0);
-				//}else if(i==2){
-				//rbl=adc_read(3);
-			//}
-		//}
-		i=1;
+		
+		switch(caseADC){
+			case 1:{
+				value=ADC_Read(0);
+				rBPM=((value*14)/1024)+10; // BPM range vary from 10 to 24 
+				caseADC++;
+				ADC_Init();
+				break;
+				
+			}
+			case 2:{
+				value=ADC_Read(3);
+				rBL=((value*650)/1024)+250; // BL range vary from 250 to 900
+				caseADC++;
+				ADC_Init();
+				break;
+			}
+			case 3:{
+				value=ADC_Read(4);
+				rOP=(100*value)/1024; // OP range vary from 0 to 100
+				caseADC=1;
+				ADC_Init();
+				break;
+			}
+			
+			
+		}
+		
+	
 
-		lcd_cmd(0x28);
-		char* rSOP,rSBPM,rSBL;
-		itoa(rOP,rSOP,10);
-		itoa(rOP,rSBPM,10);
-		itoa(rOP,rSBL,10);
-		///lcd_msg(rSOP);
-		//lcd_msg(rSBPM);
-		//lcd_msg(rSBL);
-
-     startOxygenAndAirSupply(60);
+     
 
 
 
@@ -240,13 +237,13 @@ int main(void)
                 }
             }else{
                 checkPatientTemp();
-                getParametersFromKnobs();
+                getParametersFromKnobs();// update o2 percentage manually
                 startOxygenAndAirSupply(Oxygen_percentage);
             }
         }else{return 0;}
     }
 }
-ISR (INT0_vect) {         //External interrupt
+ISR (INT0_vect) { //External interrupt
 	
 	OxygenAutomation=!OxygenAutomation;
 	
@@ -261,7 +258,7 @@ ISR (INT0_vect) {         //External interrupt
 	lcd_cmd(0x01);  
 	
 }
-ISR (INT1_vect) {         //External interrupt
+ISR (INT1_vect) { //External interrupt
 	power=!power;
 	if(power){
 		lcd_cmd(0x01);  
@@ -278,11 +275,23 @@ ISR (INT1_vect) {         //External interrupt
 char *boolstring( _Bool b ) { return b ? "true" : "false"; }
 void startOxygenAndAirSupply(int percentage) {
     controlOxygenPercentage(checkBloodOxygenLevel());
-	controlSolenoidValve(Oxygen_percentage, Average_Breath_Per_Min);
-    startStepperMotor(Average_Breath_Per_Min, Average_Breath_length);
+	controlSolenoidValve(Oxygen_percentage, rBPM);
+    startStepperMotor(rBPM, rBL);
     
 }
 void controlOxygenPercentage(int bloodOxygenLevel){
+	if (bloodOxygenLevel<40)
+	{
+		Oxygen_percentage=90;
+	}else if (bloodOxygenLevel<70)
+	{
+		Oxygen_percentage=70;
+	}else if (bloodOxygenLevel<90)
+	{
+		Oxygen_percentage=60;
+	}else if(bloodOxygenLevel<94){
+	Oxygen_percentage=40;
+	}
     //update variable Oxygen Percentage According to Blood Oxygen Level
 }
 
@@ -315,12 +324,12 @@ double getOxygenTankPressure() {
 
 
 void startAirSupply() {
-    startStepperMotor(Average_Breath_Per_Min, Average_Breath_length);
-    controlSolenoidValve(100, Average_Breath_Per_Min);
+    startStepperMotor(rBPM, rBL);
+    controlSolenoidValve(0,rBPM);
 }
 int checkBloodOxygenLevel() {
 
-    return 0;//return Blood Oxygen Level
+    return 39;//return Blood Oxygen Level
 }
 
 int PatientTemp() {
@@ -347,7 +356,8 @@ bool checkPatientTemp() {
 }
 
 void getParametersFromKnobs() {
-
+    
+	Oxygen_percentage=rOP;
     //get values and update  Breath per min,Oxygen Percentage,Breath Length
 }
 
