@@ -2,7 +2,7 @@
  * GccApplication2.c
  *
  * Created: 5/12/2022 11:27:58 PM
- * Author : Piyumanthi
+ * Author : Piyumanthi Nisansala
  */ 
 #define F_CPU 16000000UL
 #include <avr/io.h>

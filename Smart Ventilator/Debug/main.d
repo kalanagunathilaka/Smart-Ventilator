@@ -22,7 +22,7 @@ main.d main.o: .././main.c \
  ../millis.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
  .././lcd.h .././i2c.h .././keypad.h .././GSM.h .././USART.h \
- .././solenoidValves.h .././stepper\ motor.h
+ .././solenoidValves.h .././stepper\ motor.h .././potentiometer.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -81,3 +81,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 .././solenoidValves.h:
 
 .././stepper\ motor.h:
+
+.././potentiometer.h:

@@ -21,6 +21,7 @@
 #include "GSM.h"
 #include "solenoidValves.h"
 #include "stepper motor.h"
+#include "potentiometer.h"
 
 
 bool checkStatus();
@@ -46,32 +47,10 @@ double getOxygenTankPressure();
 void openSolenoidValves(double air, double oxygen);
 void GSMConnect();
 void sendSMS(char no[], const char *string);
+bool checkPower();
 
 
-void ADC_Init()
-{
-	DDRA=0x0;			/* Make ADC port as input */
-	ADCSRA = 0x87;			/* Enable ADC, fr/128  */
-	ADMUX = 0x40;			/* Vref: Avcc, ADC channel: 0 */
-	
-}
 
-int ADC_Read(char channel)
-{
-	int Ain,AinLow;
-	
-	ADMUX=ADMUX|(channel & 0x0f);	/* Set input channel to read */
-
-	ADCSRA |= (1<<ADSC);		/* Start conversion */
-	while((ADCSRA&(1<<ADIF))==0);	/* Monitor end of conversion interrupt */
-	
-	_delay_us(10);
-	AinLow = (int)ADCL;		/* Read lower byte*/
-	Ain = (int)ADCH*256;		/* Read higher 2 bits and 
-					Multiply with weight */
-	Ain = Ain + AinLow;				
-	return(Ain);			/* Return digital value*/
-}
 
 const char *concatS(const char *string, char sPercentage[4]);
 char *boolstring( _Bool b );
@@ -94,6 +73,7 @@ int i;
 int caseADC=1;
 char String[5];
 int value;
+int powerfailure;
 
 
 int main(void)
@@ -110,6 +90,7 @@ int main(void)
 	 DDRD=DDRD | (0<<2);//PD2 as Oxygen Automation
 	 DDRD=DDRD | (0<<3);//PD3 as input for power on
 	 DDRD=DDRD | (1<<4);//Speaker
+	 DDRA=DDRA | (0<<7);//PA7 as input for power supply
 	 
 	 MCUCR  |= 1<<ISC01;   //interrupt fire on falling edge in INT0
 	 MCUCR  |= 1<<ISC11;   //interrupt fire on falling edge in INT1
@@ -137,18 +118,18 @@ int main(void)
 	_delay_ms(100);
 	lcd_cmd(0x80);
 	 
-	 for (i=0;i<10;)
-	 {
-		PORTB =0xF0;  
-		do{
-			x=Keypad();
+	// for (i=0;i<10;)
+	// {
+	//	PORTB =0xF0;  
+	//	do{
+	//		x=Keypad();
 			
-			Mobile_no[i]=atoi(x);
-			lcd_msg(x);
-			_delay_ms(50);
-		}while(PINB!=0xF0);
-		i++;
-	 }
+	//	Mobile_no[i]=x;
+	//		lcd_msg(x);
+			
+	//	}while(PINB!=0xF0);
+	//	i++;
+	// }
 	 
 	 
     USART_Init(9600);
@@ -272,7 +253,7 @@ ISR (INT1_vect) { //External interrupt
 
 }
 
-char *boolstring( _Bool b ) { return b ? "true" : "false"; }
+
 void startOxygenAndAirSupply(int percentage) {
     controlOxygenPercentage(checkBloodOxygenLevel());
 	controlSolenoidValve(Oxygen_percentage, rBPM);
@@ -376,13 +357,36 @@ bool checkStatus() {
 			char Spercentage[4];
 			itoa(oxygenTankPercentage(),Spercentage,10);//convert int to string
             notifyDisplay(concatS("Oxygen Tank Percentage ", Spercentage));
-            return 0;
-        } else { return 1; }
+           
+        }
+		if(!checkPower()){
+			if (powerfailure==NULL)
+			{
+			lcd_msg("POWER FAILURE");
+			lcd_cmd(0x01);
+			powerfailure=1;	
+			}
+			notifySpeaker();
+		}else{
+			powerfailure=NULL;
+			DDRD=DDRD | (0<<4);
+			
+		} 
+		return 1;
     }else{return 0;}
+		
 }
 
 void notifyDisplay(const char *string) {
    lcd_msg(string);
+}
+
+bool checkPower(){
+	if ( (PINA & (1 << PINA7)) == (1 << PINA7) ) {
+		return 1;// pin is high
+		} else {
+		return 0;// pin is low
+	}
 }
 
 void notifyGSM(const char *string, int percentage) {

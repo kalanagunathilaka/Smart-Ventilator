@@ -171,6 +171,9 @@
     <Compile Include="millis.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="potentiometer.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="solenoidValves.h">
       <SubType>compile</SubType>
     </Compile>
