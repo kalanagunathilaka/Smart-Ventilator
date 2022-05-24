@@ -162,6 +162,9 @@
     <Compile Include="lcd.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="LM35 Temperature Sensor.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -169,6 +172,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="millis.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="MPX4250 Pressure Sensor.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="potentiometer.h">

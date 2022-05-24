@@ -22,6 +22,8 @@
 #include "solenoidValves.h"
 #include "stepper motor.h"
 #include "potentiometer.h"
+#include "MPX4250 Pressure Sensor.h"
+#include "LM35 Temperature Sensor.h"
 
 bool checkStatus();
 int oxygenTankPercentage();
@@ -62,8 +64,10 @@ volatile int buffer_pointer;
 unsigned char x;
 bool power = true;
 bool OxygenAutomation = true;
+int Set_Heart_Rate();
 
 int rBPM;
+int rHR;
 int rBL;
 int rOP;
 int i;
@@ -146,7 +150,8 @@ initialPoint:
     } while (PINB != 0xF0);
 
     lcd_cmd(0x01);
-    lcd_cmd(0x80);
+	
+    /*lcd_cmd(0x80);
     
     for (int i = 0; i < 11; i++)
     {
@@ -155,7 +160,7 @@ initialPoint:
         _delay_ms(50);
     }
     _delay_ms(100);
-    lcd_cmd(0x01);
+    lcd_cmd(0x01);*/
 
     lcd_cmd(0x80);
     lcd_msg("Number");
@@ -181,14 +186,14 @@ initialPoint:
 			     lcd_cmd(0x01);
 				 lcd_cmd(0x80);
 				 itoa(checkBloodOxygenLevel(), Spercentage, 10);
-				 lcd_msg(concatS("PBOxyL-", Spercentage));
-				 itoa(rBPM, Spercentage, 10);
+				 lcd_msg(concatS("PBO2L-", Spercentage));
+				 itoa(Set_Heart_Rate(), Spercentage, 10);
 				 lcd_msg(concatS("  HR-", Spercentage));
 				 lcd_cmd(0xc0);
-				 itoa(checkPatientTemp(), Spercentage, 10);
+				 itoa(PatientTemp(), Spercentage, 10);
 				 lcd_msg(concatS("Temp-",Spercentage));
 				 itoa(checkPatientExpPresure(), Spercentage, 10);
-				 lcd_msg(concatS("   ExpP-", Spercentage));
+				 lcd_msg(concatS(" ExpP-", Spercentage));
 			case_num2++;
 			}else if(need_millis1<millis()){
 			
@@ -204,9 +209,9 @@ initialPoint:
 					lcd_msg(concatS("   BL-", Spercentage1));
 					lcd_cmd(0xc0);
 					itoa(oxygenTankPercentage(), Spercentage1, 10);
-					lcd_msg(concatS("OxyTP-", Spercentage1));
+					lcd_msg(concatS("O2TP-", Spercentage1));
 					itoa(Oxygen_percentage, Spercentage1, 10);
-					lcd_msg(concatS("AOxyP-", Spercentage1));
+					lcd_msg(concatS(" AO2P-", Spercentage1));
 					case_num2++;
 					need_millis2=need_millis2+500;
 					break;
@@ -231,26 +236,26 @@ initialPoint:
         {
         case 1:
         {
+			ADC_Init();
             value = ADC_Read(0);
             rBPM = ((value * 14) / 1024) + 10; // BPM range vary from 10 to 24
             caseADC++;
-            ADC_Init();
             break;
         }
         case 2:
         {
+			ADC_Init();
             value = ADC_Read(3);
             rBL = ((value * 650) / 1024) + 250; // BL range vary from 250 to 900
             caseADC++;
-            ADC_Init();
             break;
         }
         case 3:
         {
+			ADC_Init();
             value = ADC_Read(4);
             rOP = (100 * value) / 1024; // OP range vary from 0 to 100
             caseADC = 1;
-            ADC_Init();
             break;
         }
         }
@@ -374,7 +379,8 @@ void controlSolenoidValve(double oxygenPercentage, int breathPerMin)
 
 double getOxygenTankPressure()
 {
-    return 12000; // return Oxygen tank pressure in pascal
+    float kilopascal = get_pressure(1); 
+	return kilopascal*1000; // return Oxygen tank pressure in pascal
 }
 
 void startAirSupply()
@@ -390,7 +396,9 @@ int checkBloodOxygenLevel()
 
 int PatientTemp()
 {
-    return 37; // return temperature value
+	float temp;
+	temp= get_Temperature();
+    return temp; // return temperature value
 }
 
 void notifySpeaker()
@@ -502,8 +510,19 @@ const char *concatS(const char *string, char sPercentage[4])
 
 int oxygenTankPercentage()
 {
-    return 80;
+	float x;
+	int y;
+	x=getOxygenTankPressure();
+	y= (100-((300000-x)/3000));
+    return y;
 }
-int checkPatientExpPresure(){
-	return 2;
+int checkPatientExpPresure()
+{
+	float kilopascal = get_pressure(2);
+	return kilopascal; // return patient expiration pressure in kilopascal
+}
+
+int Set_Heart_Rate()
+{
+	return 80;
 }
