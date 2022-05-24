@@ -147,7 +147,7 @@ initialPoint:
 
     lcd_cmd(0x01);
     lcd_cmd(0x80);
-    lcd_msg(Mobile_no);
+    
     for (int i = 0; i < 11; i++)
     {
 
@@ -183,12 +183,12 @@ initialPoint:
 				 itoa(checkBloodOxygenLevel(), Spercentage, 10);
 				 lcd_msg(concatS("PBOxyL-", Spercentage));
 				 itoa(rBPM, Spercentage, 10);
-				 lcd_msg(concatS("HR-", Spercentage));
+				 lcd_msg(concatS("  HR-", Spercentage));
 				 lcd_cmd(0xc0);
 				 itoa(checkPatientTemp(), Spercentage, 10);
 				 lcd_msg(concatS("Temp-",Spercentage));
 				 itoa(checkPatientExpPresure(), Spercentage, 10);
-				 lcd_msg(concatS("ExpP-", Spercentage));
+				 lcd_msg(concatS("   ExpP-", Spercentage));
 			case_num2++;
 			}else if(need_millis1<millis()){
 			
@@ -201,10 +201,10 @@ initialPoint:
 					itoa(rBPM, Spercentage1, 10);
 					lcd_msg(concatS("BPM-", Spercentage1));
 					itoa(rBL, Spercentage1, 10);
-					lcd_msg(concatS("BL-", Spercentage1));
+					lcd_msg(concatS("   BL-", Spercentage1));
 					lcd_cmd(0xc0);
-					itoa(getOxygenTankPressure(), Spercentage1, 10);
-					lcd_msg(concatS("OxyTankP-", Spercentage1));
+					itoa(oxygenTankPercentage(), Spercentage1, 10);
+					lcd_msg(concatS("OxyTP-", Spercentage1));
 					itoa(Oxygen_percentage, Spercentage1, 10);
 					lcd_msg(concatS("AOxyP-", Spercentage1));
 					case_num2++;
