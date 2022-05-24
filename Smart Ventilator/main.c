@@ -134,20 +134,30 @@ int main(void)
 	 i2c_start();
 	 i2c_write(0x70);
 	 lcd_init();
-	// lcd_msg("Enter Phone Number");
 	 
-	// for (i=0;i<9;)
-	// {
-	//	PORTB =0xF0;  
-	//	do{
-	//		x=Keypad();
+	lcd_cmd(0x80);
+	lcd_msg("Enter Phone");
+	_delay_ms(100);
+	lcd_cmd(0xC0);
+	_delay_ms(100);
+	lcd_msg("Number");
+	_delay_ms(100);
+	lcd_cmd(0x01);
+	_delay_ms(100);
+	lcd_cmd(0x80);
+	 
+	 for (i=0;i<10;)
+	 {
+		PORTB =0xF0;  
+		do{
+			x=Keypad();
 			
-	//		Mobile_no[i]=atoi(x);
-	//		lcd_msg(x);
-	//		_delay_ms(20);
-	//	}while(PINB!=0xF0);
-	//	i++;
-	// }
+			Mobile_no[i]=atoi(x);
+			lcd_msg(x);
+			_delay_ms(50);
+		}while(PINB!=0xF0);
+		i++;
+	 }
 	 
 	 
     USART_Init(9600);
