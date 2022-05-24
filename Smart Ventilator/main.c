@@ -109,7 +109,6 @@ int main(void)
 	 
 	lcd_cmd(0x80);
 	lcd_msg("Enter Phone");
-	_delay_ms(100);
 	lcd_cmd(0xC0);
 	_delay_ms(100);
 	lcd_msg("Number");
@@ -162,6 +161,7 @@ int main(void)
 			
 			
 		}while(PINB!=0xF0);
+		
 	
 	
 	/* for (i=0;i<10;)
@@ -179,6 +179,7 @@ int main(void)
 		 i++;
 	 }*/
 	 lcd_cmd(0x01);
+	 
 	  lcd_cmd(0x80);
 	 for(int i=0;i<11;i++)
 	 {
@@ -186,6 +187,13 @@ int main(void)
 		 lcd_msg(Mobile_no[i]);
 		 _delay_ms(50);
 	 }
+	  _delay_ms(100);
+	  lcd_cmd(0x01);
+	  
+	  lcd_cmd(0x80);
+	  lcd_msg("Number");
+	  lcd_cmd(0xc0);
+	  lcd_msg("Registered");
 	  _delay_ms(100);
 	  lcd_cmd(0x01);
 	 
@@ -230,6 +238,21 @@ int main(void)
 	 
     while (1)
     {   
+		lcd_cmd(0x80);
+		lcd_msg("OxyL");
+		lcd_msg(" HR");
+		lcd_cmd(0xc0);
+		lcd_msg("Temp");
+		lcd_msg(" LungP");
+		_delay_ms(500);
+		lcd_cmd(0x01);
+		lcd_cmd(0x80);
+		lcd_msg("BPM");
+		lcd_msg(" BL");
+		lcd_cmd(0xc0);
+		lcd_msg("OxyTankP");
+		_delay_ms(500);
+		lcd_cmd(0x01);
 		
 		switch(caseADC){
 			case 1:{
