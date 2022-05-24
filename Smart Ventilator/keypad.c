@@ -68,22 +68,22 @@ char Keypad()
 	
 
 	PORTB=0b1110111;   // make fourth row 0
-	if((PINB &(1<<PINB4))==0)
+	/*if((PINB &(1<<PINB4))==0)
 	{
 		_delay_ms(20);
 		return"del";
 		
-	}
-	else if((PINB&(1<<PINB5))==0)
+	}*/
+	 if((PINB&(1<<PINB5))==0)
 	{
 		_delay_ms(20);
 		return"0";
 	}
-	else if((PINB&(1<<PINB6))==0)
+	/*else if((PINB&(1<<PINB6))==0)
 	{
 		_delay_ms(20);
 		return"ok";
-	}
+	}*/
 	
 
 }

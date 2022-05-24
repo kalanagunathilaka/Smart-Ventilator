@@ -60,7 +60,7 @@ int Average_Breath_Per_Min=12;
 int Oxygen_percentage=90;
 char buff[160];
 char status_flag = 0;
-char Mobile_no[12];
+char Mobile_no[11];
 volatile int buffer_pointer;
 unsigned char x;
 bool power=true;
@@ -118,18 +118,76 @@ int main(void)
 	_delay_ms(100);
 	lcd_cmd(0x80);
 	 
-	// for (i=0;i<10;)
-	// {
-	//	PORTB =0xF0;  
-	//	do{
-	//		x=Keypad();
+	/*for (i=0;i<10;)
+	 {
+		PORTB =0xF0;  
+		do{
+			x=Keypad();
 			
-	//	Mobile_no[i]=x;
-	//		lcd_msg(x);
+		Mobile_no[i]=x;
+			lcd_msg(x);
+			_delay_ms(70);
 			
-	//	}while(PINB!=0xF0);
-	//	i++;
-	// }
+			
+		}while(PINB!=0xF0);
+		i++;
+	 }*/
+	table:
+	lcd_cmd(0x01);
+	/*for (int i = 0; i < 100; ++i)
+	{
+		Mobile_no[i] = 0;
+	}*/
+		PORTB =0xF0;
+		int f=0;
+		do{
+			x=Keypad();
+			
+			Mobile_no[f]=x;
+			if(((PINB &(1<<PINB4))==0) || ((PINB&(1<<PINB5))==0) || ((PINB&(1<<PINB6))==0))
+			{
+				f++;
+			}
+			lcd_msg(x);
+			_delay_ms(70);
+			
+			if((PINB &(1<<PINB4))==0) //clr button
+			{
+				goto table;
+			}
+			if((PINB&(1<<PINB6))==0) //ok button
+			{
+				break;
+			}
+			
+			
+		}while(PINB!=0xF0);
+	
+	
+	/* for (i=0;i<10;)
+	 {
+		 PORTB =0xF0;
+		 if(PINB!=0xF0)
+		 {
+			 x=Keypad();
+		 }
+		 Mobile_no[i]=x;
+		 lcd_msg(x);
+		 _delay_ms(50);
+		 
+		 
+		 i++;
+	 }*/
+	 lcd_cmd(0x01);
+	  lcd_cmd(0x80);
+	 for(int i=0;i<11;i++)
+	 {
+		
+		 lcd_msg(Mobile_no[i]);
+		 _delay_ms(50);
+	 }
+	  _delay_ms(100);
+	  lcd_cmd(0x01);
 	 
 	 
     USART_Init(9600);
@@ -327,7 +385,7 @@ bool checkPatientTemp() {
         notifyGSM("Temperature Not Normal-",PatientTemp());
 		char Spercentage[4];
 		itoa(PatientTemp(),Spercentage,10);//convert int to string
-		notifyDisplay(concatS("Temperature Not Normal-", Spercentage)); 
+		notifyDisplay(concatS("Abnormal Temp-", Spercentage)); 
         notifySpeaker();
         return 0;
     }else{
@@ -356,7 +414,7 @@ bool checkStatus() {
             notifyGSM("Oxygen Tank Percentage : ", oxygenTankPercentage());
 			char Spercentage[4];
 			itoa(oxygenTankPercentage(),Spercentage,10);//convert int to string
-            notifyDisplay(concatS("Oxygen Tank Percentage ", Spercentage));
+            notifyDisplay(concatS("OxyTank % ", Spercentage));
            
         }
 		if(!checkPower()){
@@ -379,6 +437,7 @@ bool checkStatus() {
 
 void notifyDisplay(const char *string) {
    lcd_msg(string);
+   lcd_cmd(0x01);
 }
 
 bool checkPower(){
