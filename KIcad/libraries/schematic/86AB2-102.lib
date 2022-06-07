@@ -1,0 +1,29 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# 86AB2-102
+#
+DEF 86AB2-102 U 0 40 Y Y 1 L N
+F0 "U" -200 430 50 H V L BNN
+F1 "86AB2-102" -200 -430 50 H V L BNN
+F2 "KEYPAD_86AB2-102" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "Grayhill" 0 0 50 H I L BNN "MANUFACTURER"
+F5 "" 0 0 50 H I L BNN "PARTREV"
+F6 "9.39 mm" 0 0 50 H I L BNN "MAXIMUM_PACKAGE_HEIGHT"
+F7 "IPC7351B" 0 0 50 H I L BNN "STANDARD"
+DRAW
+S -200 -400 200 400 0 0 10 f
+X E E -400 200 200 R 40 40 0 0 B 
+X D D -400 300 200 R 40 40 0 0 B 
+X G G -400 0 200 R 40 40 0 0 B 
+X F F -400 100 200 R 40 40 0 0 B 
+X H H -400 -100 200 R 40 40 0 0 B 
+X J J -400 -200 200 R 40 40 0 0 B 
+X K K -400 -300 200 R 40 40 0 0 B 
+ENDDRAW
+ENDDEF
+#
+# End Library

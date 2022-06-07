@@ -47,7 +47,7 @@ void rotateFullForward(int breathPerMin);
 double getOxygenTankPressure();
 void openSolenoidValves(double air, double oxygen);
 void GSMConnect();
-void sendSMS(char no[], const char *string);
+void sendSMS(char no[11], const char *string);
 bool checkPower();
 int checkPatientExpPresure();
 
@@ -57,10 +57,8 @@ int Average_Blood_Oxygen_level = 94;
 int Average_Breath_length = 50;
 int Average_Breath_Per_Min = 12;
 int Oxygen_percentage = 90;
-char buff[160];
-char status_flag = 0;
 char Mobile_no[11];
-volatile int buffer_pointer;
+
 unsigned char x;
 bool power = true;
 bool OxygenAutomation = true;
@@ -101,7 +99,7 @@ int main(void)
     //
     GICR |= 1 << INT0; // Enable the external interrupt source in general interrupt control register
     GICR |= 1 << INT1; // Enable the external interrupt source in general interrupt control register
-
+	
     init_millis(8000000UL);
     sei();
     ADC_Init();
@@ -109,7 +107,8 @@ int main(void)
     i2c_start();
     i2c_write(0x70);
     lcd_init();
-
+	
+	
     lcd_cmd(0x80);
     lcd_msg("Enter Phone");
     _delay_ms(30);
@@ -129,8 +128,8 @@ initialPoint:
     do
     {
         x = Keypad();
-
-        Mobile_no[f] = x;
+        Mobile_no[f]=x;
+         
         if (((PINB & (1 << PINB4)) == 0) || ((PINB & (1 << PINB5)) == 0) || ((PINB & (1 << PINB6)) == 0))
         {
             f++;
@@ -148,34 +147,44 @@ initialPoint:
         }
 
     } while (PINB != 0xF0);
-
+   
     lcd_cmd(0x01);
-	
-    /*lcd_cmd(0x80);
-    
-    for (int i = 0; i < 11; i++)
-    {
-
-        lcd_msg(Mobile_no[i]);
-        _delay_ms(50);
-    }
-    _delay_ms(100);
-    lcd_cmd(0x01);*/
-
-    lcd_cmd(0x80);
+	lcd_cmd(0x80);
     lcd_msg("Number");
     lcd_cmd(0xc0);
     lcd_msg("Registered");
     _delay_ms(100);
     lcd_cmd(0x01);
+	
 
     USART_Init(9600);
     _delay_ms(1000);
     GSMConnect();
-    sendSMS(Mobile_no, "test");
+    
 
     while (1)
     {
+		switch (caseADC)
+		{
+			case 1:
+			{
+				ADC_Init();
+				value = ADC_Read(3);
+				rBL = ((value * 500) / 1024) + 250; // BL range vary from 250 to 750
+				caseADC++;
+				break;
+				
+			}
+			case 2:
+			{
+				ADC_Init();
+				value = ADC_Read(0);
+				rBPM = ((value * 14) / 1024) + 10; // BPM range vary from 10 to 24
+				caseADC=1;
+				break;
+			}
+			
+		}
 		
 		if(prev_millis2==NULL){
 			
@@ -232,33 +241,7 @@ initialPoint:
        
        
 
-        switch (caseADC)
-        {
-        case 1:
-        {
-			ADC_Init();
-            value = ADC_Read(0);
-            rBPM = ((value * 14) / 1024) + 10; // BPM range vary from 10 to 24
-            caseADC++;
-            break;
-        }
-        case 2:
-        {
-			ADC_Init();
-            value = ADC_Read(3);
-            rBL = ((value * 650) / 1024) + 250; // BL range vary from 250 to 900
-            caseADC++;
-            break;
-        }
-        case 3:
-        {
-			ADC_Init();
-            value = ADC_Read(4);
-            rOP = (100 * value) / 1024; // OP range vary from 0 to 100
-            caseADC = 1;
-            break;
-        }
-        }
+        
 
         if (checkStatus())
         {
@@ -281,7 +264,8 @@ initialPoint:
             {
                 checkPatientTemp();
                 getParametersFromKnobs(); // update o2 percentage manually
-                startOxygenAndAirSupply(Oxygen_percentage);
+                controlSolenoidValve(Oxygen_percentage, rBPM);
+                startStepperMotor(rBPM, rBL);
             }
         }
         else
@@ -426,8 +410,11 @@ bool checkPatientTemp()
 
 void getParametersFromKnobs()
 {
-
-    Oxygen_percentage = rOP;
+ 
+	 ADC_Init();
+	 value = ADC_Read(4);
+	 rOP = (100 * value) / 1024; // OP range vary from 0 to 100
+	 Oxygen_percentage = rOP;
     // get values and update  Breath per min,Oxygen Percentage,Breath Length
 }
 

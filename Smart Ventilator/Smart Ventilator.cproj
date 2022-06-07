@@ -159,6 +159,9 @@
     <Compile Include="keypad.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="lcd.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="lcd.h">
       <SubType>compile</SubType>
     </Compile>
@@ -187,6 +190,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="USART.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART_Interrupt.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART_Interrupt.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

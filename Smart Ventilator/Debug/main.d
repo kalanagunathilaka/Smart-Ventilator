@@ -21,7 +21,7 @@ main.d main.o: .././main.c \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
  ../millis.h \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
- .././lcd.h .././i2c.h .././keypad.h .././GSM.h .././USART.h \
+ .././lcd.h .././i2c.h .././keypad.h .././GSM.h .././USART_Interrupt.h \
  .././solenoidValves.h .././stepper\ motor.h .././potentiometer.h \
  .././MPX4250\ Pressure\ Sensor.h .././LM35\ Temperature\ Sensor.h
 
@@ -77,7 +77,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\
 
 .././GSM.h:
 
-.././USART.h:
+.././USART_Interrupt.h:
 
 .././solenoidValves.h:
 
