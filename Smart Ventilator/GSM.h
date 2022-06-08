@@ -16,7 +16,7 @@
 #define ISP "dialog"
 #define APN "dialog"
 char data_buffer[100];
-char buff[160];								// buffer to store responses and messages 
+char buff[160];								// buffer to store responses  
 char status_flag = 0;	
 volatile int buffer_pointer;
 

@@ -2112,7 +2112,6 @@
     )
   )
 
-
   (junction (at 166.37 119.38) (diameter 0) (color 0 0 0 0)
     (uuid 08cf1c6f-79d3-4bb7-89c5-1a45942830ac)
   )
@@ -2231,8 +2230,8 @@
   (no_connect (at 209.55 35.56) (uuid 07e0c235-5334-4eb9-a123-9967f0b1c03d))
   (no_connect (at 204.47 35.56) (uuid 0ad5c6cc-9fca-4be0-9a3a-6bff8117d5f0))
   (no_connect (at 237.49 35.56) (uuid 58fa3933-16d5-4133-b5fd-5be0a8a6547c))
-  (no_connect (at 247.65 35.56) (uuid 58fa3933-16d5-4133-b5fd-5be0a8a6547c))
-  (no_connect (at 242.57 35.56) (uuid 58fa3933-16d5-4133-b5fd-5be0a8a6547c))
+  (no_connect (at 247.65 35.56) (uuid 58fa3933-16d5-4133-b5fd-5be0a8a6547d))
+  (no_connect (at 242.57 35.56) (uuid 58fa3933-16d5-4133-b5fd-5be0a8a6547e))
   (no_connect (at 88.9 57.15) (uuid 946f1282-7536-49b5-a132-cb89cbfa2678))
   (no_connect (at 102.87 45.72) (uuid 9e39db41-5a2b-4d91-abca-8a19a8988c4e))
   (no_connect (at 214.63 35.56) (uuid adcf6ba9-7b24-4cdf-8259-39e2577baac1))
@@ -4871,7 +4870,7 @@
       (reference "SW2") (unit 1) (value "Power") (footprint "Button_Switch_SMD:SW_Push_1P1T_NO_6x6mm_H9.5mm")
     )
     (path "/284c20cd-2f62-4105-a8f0-0e56a6a53051/5a559a62-8fad-4a96-94f0-5ff6b6ef86e7"
-      (reference "T1") (unit 1) (value "Transformer_1P_1S") (footprint "Transformer_SMD:Pulse_PA2006NL")
+      (reference "T1") (unit 1) (value "Transformer_1P_1S") (footprint "Transformer_THT:Transformer_Toroid_Horizontal_D9.0mm_Amidon-T30")
     )
     (path "/af0a1512-be65-4e85-8111-e466ec00df64"
       (reference "U1") (unit 1) (value "ATmega32-16A") (footprint "Package_QFP:TQFP-44_10x10mm_P0.8mm")
