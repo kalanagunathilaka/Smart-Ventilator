@@ -49,6 +49,9 @@ This project aims to develop a low cost smart ventilator system that requires mi
 ![alt text](https://github.com/yesitha/Smart-Ventilator/blob/main/SmartVentilator%20ReadmeAssets/PCBofPowerSupply.png?raw=true)
 ![alt text](https://github.com/yesitha/Smart-Ventilator/blob/main/SmartVentilator%20ReadmeAssets/3DviewofPowerSupply.png?raw=true)
 
+
+[**3D Animation**](https://dms.uom.lk/s/HgEqCMnCMRMiKYt)
+
 **Software Used**
 
 - Microchip Studio - Program Microcontroller
