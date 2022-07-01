@@ -62,7 +62,7 @@ This project aims to develop a low cost smart ventilator system that requires mi
 - [Yesitha Sathsara](https://github.com/yesitha)
 - [Shakila Kularathna](https://github.com/shakila2030)
 - [Nelaka Gunawardhana](https://github.com/NelakaGunawardhana)
-- [Kalana Gunathilaka](https://pages.github.com/)
+- [Kalana Gunathilaka](https://github.com/KalanaLakshan)
 - [Piyumanthi Nisansala](https://github.com/piyumanthiNisansala)
 
 
